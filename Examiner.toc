@@ -1,0 +1,29 @@
+## Interface: 30001
+## Version: Classic Fan Update (3.00.1)
+## Title: Examiner
+## Author: Aezay (Earthen Ring EU), Grome (Sulfuron), Sillindra (Angerforge)
+## Notes: Advanced Inspection Mod of Gear and Honor.
+## SavedVariables: Examiner_Config, Examiner_Cache
+## OptionalDeps: Details
+
+## libs ##
+LibGearExam\LibGearExam.xml
+Libs\AzDialog.lua
+Libs\AzDropDown.lua
+Libs\LibTableRecycler.lua
+Libs\LibItemString.lua
+
+## core ##
+Examiner.lua
+modcore.lua
+
+## modules ##
+Modules\modlist.lua
+Modules\itemslots.lua
+Modules\config.lua
+Modules\cache.lua
+Modules\stats.lua
+Modules\pvp.lua
+Modules\gearlist.lua
+Modules\delayedscan.lua
+Modules\itemusage.lua
