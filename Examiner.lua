@@ -40,7 +40,7 @@ local TALENT_BACKGROUNDS = {
 	"DeathKnightBlood", "DeathKnightFrost", "DeathKnightUnholy",
 	"DruidBalance", "DruidFeralCombat", "DruidRestoration",
 	"HunterBeastMastery", "HunterMarksmanship", "HunterSurvival",
---	"HunterPetCunning", "HunterPetFerocity", "HunterPetTenacity",
+    -- "HunterPetCunning", "HunterPetFerocity", "HunterPetTenacity",
 	"MageArcane", "MageFire", "MageFrost",
 	"PaladinCombat", "PaladinHoly", "PaladinProtection",
 	"PriestDiscipline", "PriestHoly", "PriestShadow",
@@ -55,7 +55,7 @@ ex.options = {
 	{ var = "makeMovable", default = false, label = "Make Examiner Movable", tip = "To freely move Examiner around, enable this option, otherwise it will behave like a normal frame, such as the Quest Log or Spellbook" },
 	{ var = "autoInspect", default = true, label = "Auto Inspect on Target Change", tip = "With this option turned on, Examiner will automatically inspect your new target when you change it." },
 	{ var = "clearInspectOnHide", default = false, label = "Clear Inspect Data on Hide", tip = "When Examiner gets hidden, this option will clear inspection data, thus freeing up some memory." },
-	-- { var = "percentRatings", default = false, label = "Show Ratings in Percentage *", tip = "* = Not working in WoD.\nWith this option enabled, ratings will be displayed in percent relative to the inspected person's level." },
+	{ var = "percentRatings", default = false, label = "Show Ratings in Percentage *", tip = "* = Not working in WoD.\nWith this option enabled, ratings will be displayed in percent relative to the inspected person's level." },
 	{ var = "combineAdditiveStats", default = true, label = "Combine Additive Stats", tip = "This option will combine certain stats which stacks with others.\n- Spell Power to specific schools\n- Intellect to Spell Power\n- AP to Ranged AP" },
 	{ var = "tooltipSmartAnchor", default = false, label = "Fixed Tooltip Anchor", tip = "Instead of showing item tooltips next to the item button, it will place it next to the Examiner window, in a fixed position" },
 };

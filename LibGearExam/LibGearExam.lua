@@ -184,8 +184,7 @@ LGE.StatRatingBaseTable = {
 	PARRY = 13.8,	-- Patch 3.2: Reduced 8% from 15
 	BLOCK = 5,
 	RESILIENCE = 28.75,	-- Patch 3.2: Increased 15% from 25
-	ARMORPENETRATION = 4.69512176513672 / 1.25 * 1.12,		-- Patch 3.1 Quote:		"All classes now receive 25% more benefit from Armor Penetration Rating."
-															-- Patch 3.2.2 Quote:	"The amount of armor penetration gained per point of this rating has been reduced by 12%."
+	ARMORPENETRATION = 4.69512176513672 / 1.25 * 1.12
 };
 
 --------------------------------------------------------------------------------------------------------
