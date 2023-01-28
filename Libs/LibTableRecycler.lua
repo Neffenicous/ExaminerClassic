@@ -1,11 +1,7 @@
-local REVISION = 2;
+local REVISION = 1;
 if (type(LibTableRecycler) == "table") and (LibTableRecycler.revision >= REVISION) then
 	return;
 end
-
-local type = type;
-local wipe = wipe;
-local tremove = tremove;
 
 LibTableRecycler = LibTableRecycler or {};
 LibTableRecycler.revision = REVISION;
@@ -15,20 +11,28 @@ LibTableRecycler.__index = LibTableRecycler;
 local storage = LibTableRecycler.storage;
 local MAX_STORAGE = 50;
 
-function LibTableRecycler:Recycle()
-	for k, v in ipairs(self) do
+local function Recycle(tbl,recursive)
+	for k, v in next, tbl do
 		if (type(v) == "table") then
-			wipe(v);
+			if (recursive) then
+				Recycle(v,1);
+			else
+				wipe(v);
+			end
 			if (#storage < MAX_STORAGE) then
 				storage[#storage + 1] = v;
 			end
 		end
-		self[k] = nil;
+		tbl[k] = nil;
 	end
+end
+
+function LibTableRecycler:Recycle(recursive)
+	Recycle(self,recursive);
 	return self;
 end
 
-function LibTableRecycler:RecycleIndex(index)
+function LibTableRecycler:RecycleIndex(index,recursive)
 	local tbl = tremove(self,index);
 	if (tbl) then
 		wipe(tbl);
@@ -45,5 +49,5 @@ function LibTableRecycler:Fetch()
 end
 
 function LibTableRecycler:New()
-	return setmetatable(#storage > 0 and tremove(storage,#storage) or {},self);
+	return setmetatable({},self);
 end

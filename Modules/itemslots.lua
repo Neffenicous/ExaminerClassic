@@ -1,5 +1,4 @@
 local ex = Examiner;
-local cfg;
 local gtt = GameTooltip;
 
 -- Module
@@ -7,10 +6,11 @@ local mod = ex:CreateModule("ItemSlots");
 mod.slotBtns = {};
 
 -- Variables
-local ITEM_ICON_UNKNOWN = "Interface\\Icons\\INV_Misc_QuestionMark";
+local cfg, cache;
+local statTipStats1, statTipStats2 = {}, {};
 
 -- Options
-mod:AddOption({ var = "alwaysShowItemLevel", default = true, label = "Always Show Item Levels", tip = "With this enabled, the items will always show their item levels, instead of having to hold down the ALT key." });
+ex.options[#ex.options + 1] = { var = "alwaysShowItemLevel", default = false, label = "Always Show Item Levels", tip = "With this enabled, the items will always show their item levels, instead of having to hold down the ALT key." };
 
 --------------------------------------------------------------------------------------------------------
 --                                           Module Scripts                                           --
@@ -18,15 +18,15 @@ mod:AddOption({ var = "alwaysShowItemLevel", default = true, label = "Always Sho
 
 -- OnInitialize
 function mod:OnInitialize()
-	cfg = ex.cfg;
+	cfg = Examiner_Config;
+	cache = Examiner_Cache;
 end
 
--- OnInspectReady
-function mod:OnInspectReady(unit,guid)
+-- OnInspect
+function mod:OnInspect(unit)
 	self:UpdateItemSlots();
 	self:ShowItemSlotButtons();
 end
-mod.OnInspect = mod.OnInspectReady;
 
 -- OnCacheLoaded
 function mod:OnCacheLoaded(entry,unit)
@@ -35,7 +35,7 @@ function mod:OnCacheLoaded(entry,unit)
 end
 
 -- OnPageChanged
-function mod:OnPageChanged(module,shown)
+function mod:OnPageChanged(mod)
 	self:ShowItemSlotButtons();
 end
 
@@ -58,8 +58,7 @@ end
 
 -- Show the Item Slot Buttons
 function mod:ShowItemSlotButtons()
-	local shownMod = (cfg.activePage and ex.modules[cfg.activePage]);
-	local visible = (ex.itemsLoaded) and (not shownMod or shownMod.showItems or not shownMod.page:IsShown());
+	local visible = (ex.itemsLoaded) and (not cfg.activePage or ex.modules[cfg.activePage].showItems);
 	for _, button in ipairs(self.slotBtns) do
 		if (visible) then
 			button:Show();
@@ -82,22 +81,19 @@ function mod:UpdateItemSlots()
 			button.texture:SetTexture(button.bgTexture);
 			button.border:Hide();
 			button.level:SetText("");
-		else
+		elseif (GetItemInfo(link)) then
 			local _, _, itemRarity, itemLevel, _, _, _, _, _, itemTexture = GetItemInfo(link);
-			if (itemTexture) then
-				button.texture:SetTexture(itemTexture or ITEM_ICON_UNKNOWN);
-				local r,g,b = GetItemQualityColor(itemRarity and itemRarity > 0 and itemRarity or 0);
-				button.border:SetVertexColor(r,g,b);
-				button.border:Show();
-				itemLevel = GetDetailedItemLevelInfo(link);
-				button.level:SetText(itemLevel);
-			else
-				button.realLink = link;
-				button.link = nil;
-				button.texture:SetTexture(ITEM_ICON_UNKNOWN);
-				button.border:Hide();
-				button.level:SetText("");
-			end
+			button.texture:SetTexture(itemTexture or "Interface\\Icons\\INV_Misc_QuestionMark");
+			local r,g,b = GetItemQualityColor(itemRarity and itemRarity > 0 and itemRarity or 0);
+			button.border:SetVertexColor(r,g,b);
+			button.border:Show();
+			button.level:SetText(itemLevel);
+		else
+			button.realLink = link;
+			button.link = nil;
+			button.texture:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark");
+			button.border:Hide();
+			button.level:SetText("");
 		end
 	end
 end
@@ -106,11 +102,56 @@ end
 --                                          Item Slot Scripts                                         --
 --------------------------------------------------------------------------------------------------------
 
+-- OnEnter
+local function OnEnter(self,motion)
+	-- Inspect Cursor
+	if (IsModifiedClick("DRESSUP")) then
+		ShowInspectCursor();
+	else
+		ResetCursor();
+	end
+	-- Set Tip
+	gtt:SetOwner(self,"ANCHOR_RIGHT");
+	if (self.link) and (IsAltKeyDown()) then
+		local itemName, _, itemRarity = GetItemInfo(self.link);
+		gtt:AddLine(itemName,GetItemQualityColor(itemRarity));
+		ExScanner:ScanItemLink(self.link,statTipStats1);
+		if (ex.isComparing) then
+			ExScanner:ScanItemLink(ex.compareStats[self.slotName],statTipStats2);
+		end
+		for index, statToken in ipairs(ExScanner.StatNamesSorted) do
+			if (statTipStats1[statToken]) or (statTipStats2 and statTipStats2[statToken]) then
+				local statName = ExScanner.StatNames[statToken];
+				gtt:AddDoubleLine(statName,ex:GetStatValue(statToken,statTipStats1,ex.isComparing and statTipStats2),1,1,1);
+			end
+		end
+		wipe(statTipStats1);
+		wipe(statTipStats2);
+		gtt:Show();
+	elseif (ex:ValidateUnit() and CheckInteractDistance(ex.unit,1) and gtt:SetInventoryItem(ex.unit,self.id)) then
+	elseif (self.link) then
+		gtt:SetHyperlink(self.link);
+	elseif (self.realLink) then
+		gtt:SetText(_G[self.slotName:upper()]);
+		gtt:AddLine("ItemID: "..self.realLink:match("item:(%d+)"),0,0.44,0.86);
+		gtt:AddLine("This item was not in the local item cache, click this button to reload the cached player, so the item will update.",1,1,1,1);
+		gtt:Show();
+	else
+		gtt:SetText(_G[self.slotName:upper()]);
+	end
+end
+
+-- OnLeave
+local function OnLeave(self)
+	ResetCursor();
+	gtt:Hide();
+end
+
 -- OnEvent -- MODIFIER_STATE_CHANGED
 local function OnEvent(self,event,key,state)
 	-- Update Tip
 	if (gtt:IsOwned(self)) then
-		self:GetScript("OnEnter")(self);
+		OnEnter(self);
 	end
 	-- Toggle ItemLevel
 	if (not cfg.alwaysShowItemLevel) then
@@ -131,35 +172,30 @@ end
 
 -- OnClick
 local function OnClick(self,button)
-	if (CursorHasItem()) then
-		OnDrag(self);
-	elseif (self.link) then
+	if (self.link) then
 		if (button == "RightButton") then
-			-- AzMsg("---|2 Gem Overview for "..select(2,GetItemInfo(self.link)).." |r---");
-			-- for i = 1, 3 do
-				-- local _, gemLink = GetItemGem(self.link,i);
-				-- if (gemLink) then
-					-- AzMsg(format("Gem |1%d|r = %s",i,gemLink));
-				-- end
-			-- end
+			AzMsg("---|2 Gem Overview for "..select(2,GetItemInfo(self.link)).." |r---");
+			for i = 1, 3 do
+				local _, gemLink = GetItemGem(self.link,i);
+				if (gemLink) then
+					AzMsg(format("Gem |1%d|r = %s",i,gemLink));
+				end
+			end
 		elseif (button == "LeftButton") then
 			local editBox = ChatEdit_GetActiveWindow();
 			if (IsModifiedClick("DRESSUP")) then
 				DressUpItemLink(self.link);
 			elseif (IsModifiedClick("CHATLINK")) and (editBox) and (editBox:IsVisible()) then
-				local _, itemLink = GetItemInfo(self.link);
-				editBox:Insert(itemLink);
+				editBox:Insert(select(2,GetItemInfo(self.link)));
 			else
 				OnDrag(self);
 			end
 		end
 	elseif (self.realLink) then
-		-- Az: this needs to be changed, look at shared onenter func for more info
-		-- Az: should not be like this anymore, a single call to GetItemInfo() would make the client cache the item, so just make some kind of postcacheload thingie, or just redo the OnCacheLoaded event?
 		local entryName = ex:GetEntryName();
 		ex:ClearInspect();
 		ex:LoadPlayerFromCache(entryName);
-		self:GetScript("OnEnter")(self);
+		OnEnter(self);
 	end
 end
 
@@ -180,9 +216,10 @@ end
 --                                           Widget Creation                                          --
 --------------------------------------------------------------------------------------------------------
 
-for index, slot in ipairs(LibGearExam.Slots) do
-	local btn = CreateFrame("Button","ExaminerItemButton"..slot,ex.model); -- Some other mods bug if you create this nameless
-	btn:SetSize(37,37);
+for index, slot in ipairs(ExScanner.Slots) do
+	local btn = CreateFrame("Button","ExaminerItemButton"..slot,ex.model); -- Some other mods bug if you create this nameless......
+	btn:SetWidth(37);
+	btn:SetHeight(37);
 	btn:RegisterForClicks("LeftButtonUp","RightButtonUp");
 	btn:RegisterForDrag("LeftButton");
 	btn:SetPushedTexture("Interface\\Buttons\\UI-Quickslot-Depress");
@@ -191,8 +228,8 @@ for index, slot in ipairs(LibGearExam.Slots) do
 	btn:SetScript("OnShow",OnShow);
 	btn:SetScript("OnHide",OnHide);
 	btn:SetScript("OnClick",OnClick);
-	btn:SetScript("OnEnter",ex.ItemButton_OnEnter);
-	btn:SetScript("OnLeave",ex.ItemButton_OnLeave);
+	btn:SetScript("OnEnter",OnEnter);
+	btn:SetScript("OnLeave",OnLeave);
 	btn:SetScript("OnEvent",OnEvent);
 	btn:SetScript("OnDragStart",OnDrag);
 	btn:SetScript("OnReceiveDrag",OnDrag);
@@ -205,7 +242,8 @@ for index, slot in ipairs(LibGearExam.Slots) do
 
 	btn.border = btn:CreateTexture(nil,"OVERLAY");
 	btn.border:SetTexture("Interface\\Addons\\Examiner\\Textures\\Border");
-	btn.border:SetSize(41,41);
+	btn.border:SetWidth(41);
+	btn.border:SetHeight(41);
 	btn.border:SetPoint("CENTER");
 
 	btn.level = btn:CreateFontString(nil,"ARTWORK","GameFontHighlight");

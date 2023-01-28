@@ -1,16 +1,15 @@
 local ex = Examiner;
-local cfg, cache;
 local gtt = GameTooltip;
 
 -- Module
-local mod = ex:CreateModule("Stats","Gear Statistics");
-mod.help = "Right Click for extended menu";
+local mod = ex:CreateModule("Stats");
 mod:CreatePage(false);
-mod:HasButton(true);
+mod:CreateButton("Stats","Gear Statistics","Right Click for extended menu");
 mod.details = ex:CreateDetailObject();
 
 -- Variables
 local ITEM_HEIGHT = 12;
+local cfg, cache;
 local displayList = {};
 local resists = {};
 local entries = {};
@@ -24,7 +23,7 @@ local StatEntryOrder = {
 	{ [0] = PLAYERSTAT_DEFENSES, "DEFENSE", "DODGE", "PARRY", "BLOCK", "BLOCKVALUE", "RESILIENCE" },
 };
 
-
+-- Az: this is a temp slash command to add iLvlTotal value to old cached entries
 ex.slashHelp[#ex.slashHelp + 1] = " |2fixcacheitemlevels|r = Temp slash cmd to give old cache entries an avg itemlevel";
 ex.slashFuncs.fixcacheitemlevels = function(cmd)
 	local numItems = (#ExScanner.Slots - 3); -- Ignore Tabard + Shirt + Ranged, hence minus 3
@@ -52,11 +51,11 @@ end
 
 -- OnInitialize
 function mod:OnInitialize()
-	cfg = ex.cfg;
+	cfg = Examiner_Config;
 	cache = Examiner_Cache;
 	-- Defaults
 	cfg.statsViewType = (cfg.statsViewType or 1);
-	-- Add cache "iLvlAverage" sort method
+	-- Add cache sort method
 	local cacheMod = ex:GetModuleFromToken("Cache");
 	if (cacheMod) and (cacheMod.cacheSortMethods) then
 		cacheMod.cacheSortMethods[#cacheMod.cacheSortMethods + 1] = "iLvlAverage";
@@ -65,13 +64,13 @@ end
 
 -- OnConfigChanged
 function mod:OnConfigChanged(var,value)
-	if (cfg.statsViewType == 1) and (var == "combineAdditiveStats" or var == "percentRatings") then
+	if (var == "combineAdditiveStats" or var == "percentRatings") then
 		self:BuildShownList();
 	end
 end
 
 -- OnButtonClick
-function mod:OnButtonClick(frame,button)
+function mod:OnButtonClick(button)
 	-- left
 	if (button == "LeftButton") then
 		if (IsShiftKeyDown()) and (ex.itemsLoaded) then
@@ -86,48 +85,29 @@ function mod:OnButtonClick(frame,button)
 	end
 end
 
--- OnInspectReady
-function mod:OnInspectReady(unit,guid)
-	self:HasData(ex.itemsLoaded);
+-- OnInspect
+function mod:OnInspect(unit)
 	if (ex.itemsLoaded) then
+		self.details:Clear();	-- Az: due to the gem workaround, clear details here
 		self:InitDetails();
 		self:BuildShownList();
-		-- We rebuild the stat list since all items are not fully loaded. This need to be rewriten, can we use ContinueOnItemLoad(function() ?
-		C_Timer.After(0.05, function()
-			self:BuildShownList();
-		end)
+		self.button:Enable();
+	else
+		self.page:Hide();
+		self.button:Disable();
 	end
 end
-mod.OnInspect = mod.OnInspectReady;
 
 -- OnCacheLoaded
 function mod:OnCacheLoaded(entry,unit)
-	-- Az: Add "iLvlAverage" to old entries if none exist, maybe one day I will remove this
-	if (not entry.iLvlAverage) then
-		local numItems = (#LibGearExam.Slots - 2); -- Ignore Tabard + Shirt, hence minus 2
-		local iLvlTotal = 0;
-		for slotName, link in next, entry.Items do
-			if (slotName ~= "TabardSlot") and (slotName ~= "ShirtSlot") then
-				local itemLevel = GetDetailedItemLevelInfo(link);
-				if (itemLevel) then
-					if (slotName == "MainHandSlot") and (not entry.Items.SecondaryHandSlot) then
-						itemLevel = (itemLevel * 2);
-					end
-					iLvlTotal = (iLvlTotal + itemLevel);
-				end
-			end
-		end
-		entry.iLvlAverage = (iLvlTotal / numItems);
-	end
-	-- Show stuff
-	self:HasData(true);
+	self.details:Clear();	-- Az: due to the gem workaround, clear details here
 	self:InitDetails();
 	self:BuildShownList();
+	self.button:Enable();
 end
 
 -- OnClearInspect
 function mod:OnClearInspect()
-	self:HasData(nil);
 	self.details:Clear();
 end
 
@@ -288,10 +268,9 @@ end
 -- Show Resistances
 local function UpdateResistances()
 	for i = 1, 5 do
-		local statToken = (LibGearExam.MagicSchools[i].."RESIST");
+		local statToken = (ExScanner.MagicSchools[i].."RESIST");
 		if (ex.unitStats[statToken]) or (ex.isComparing and ex.compareStats[statToken]) then
-			local statText = LibGearExam:GetStatValue(statToken,ex.unitStats,ex.isComparing and ex.compareStats,ex.info.level,cfg.combineAdditiveStats,cfg.percentRatings);
-			resists[i].value:SetText(statText);
+			resists[i].value:SetText(ex:GetStatValue(statToken,ex.unitStats,ex.isComparing and ex.compareStats));
 		else
 			resists[i].value:SetText("");
 		end
@@ -299,9 +278,9 @@ local function UpdateResistances()
 end
 
 -- ScrollBar: Update Stat List
-local function UpdateShownItems(self)
-	FauxScrollFrame_Update(self,displayList.count,#entries,ITEM_HEIGHT);
-	local index = self.offset;
+local function UpdateShownItems()
+	FauxScrollFrame_Update(ExaminerStatScroll,displayList.count,#entries,ITEM_HEIGHT);
+	local index = ExaminerStatScroll.offset;
 	for i = 1, #entries do
 		index = (index + 1);
 		local entry = entries[i];
@@ -319,15 +298,13 @@ local function UpdateShownItems(self)
 				entry.right:SetText("");
 			end
 
-			-- this is where the tip is drawn
-
-			-- if (displayList[index].tip) then
-				-- entry.tip.tip = displayList[index].tip;
-				-- entry.tip:SetWidth(max(entry.right:GetWidth(),20));
-				-- entry.tip:Show();
-			-- else
-				-- entry.tip:Hide();
-			-- end
+			if (displayList[index].tip) then
+				entry.tip.tip = displayList[index].tip;
+				entry.tip:SetWidth(max(entry.right:GetWidth(),20));
+				entry.tip:Show();
+			else
+				entry.tip:Hide();
+			end
 
 			entry:Show();
 		else
@@ -360,8 +337,8 @@ local function BuildStatList()
 					AddListEntry(statCat[0]);
 					needHeader = nil;
 				end
-				local value, tip = LibGearExam:GetStatValue(statToken,ex.unitStats,ex.isComparing and ex.compareStats,ex.info.level,cfg.combineAdditiveStats,cfg.percentRatings);
-				AddListEntry(LibGearExam:FormatStatName(statToken,cfg.percentRatings),value,tip);
+				local value, tip = ex:GetStatValue(statToken,ex.unitStats,ex.isComparing and ex.compareStats);
+				AddListEntry(ExScanner.StatNames[statToken],value,tip);
 			end
 		end
 	end
@@ -376,7 +353,7 @@ local function BuildStatList()
 	-- Add Padding + Update Resistances + Shown Items
 	AddListEntry();
 	UpdateResistances();
-	UpdateShownItems(mod.scroll);
+	UpdateShownItems();
 end
 
 -- Build Detail List
@@ -393,7 +370,7 @@ local function BuildInfoList()
 	-- Add Padding + Update Resistances + Shown Items
 	AddListEntry();
 	UpdateResistances();
-	UpdateShownItems(mod.scroll);
+	UpdateShownItems();
 end
 
 -- Build the Shown List
@@ -412,12 +389,12 @@ end
 -- Resistance Boxes
 for i = 1, 5 do
 	local t = CreateFrame("Frame",nil,mod.page);
-	t:SetSize(32,29);
+	t:SetWidth(32);
+	t:SetHeight(29);
 
 	t.texture = t:CreateTexture(nil,"BACKGROUND");
 	t.texture:SetTexture("Interface\\PaperDollInfoFrame\\UI-Character-ResistanceIcons");
-	local normHeight, offset = 0.11328125, 0.00;
-	t.texture:SetTexCoord(offset,1 - offset,(i - 1 + offset) * normHeight,(i - offset) * normHeight);
+	t.texture:SetTexCoord(0,1,(i - 1) * 0.11328125,i * 0.11328125);
 	t.texture:SetAllPoints();
 
 	t.value = t:CreateFontString(nil,"ARTWORK","GameFontNormal");
@@ -438,7 +415,8 @@ end
 local StatEntry_OnEnter = function(self,motion) gtt:SetOwner(self,"ANCHOR_RIGHT"); gtt:SetText(self.tip); end
 for i = 1, 20 do
 	local t = CreateFrame("Frame",nil,mod.page);
-	t:SetSize(200,ITEM_HEIGHT);
+	t:SetWidth(200);
+	t:SetHeight(ITEM_HEIGHT);
 	t.id = i;
 
 	if (i == 1) then
@@ -453,22 +431,20 @@ for i = 1, 20 do
 
 	t.right = t:CreateFontString(nil,"ARTWORK","GameFontHighlightSmall");
 	t.right:SetPoint("RIGHT");
-	t.right:SetPoint("LEFT",t.left,"RIGHT");
 	t.right:SetTextColor(1,1,0);
-	t.right:SetJustifyH("RIGHT");
 
 	t.tip = CreateFrame("Frame",nil,t);
 	t.tip:SetPoint("TOPRIGHT");
 	t.tip:SetPoint("BOTTOMRIGHT");
 	t.tip:SetScript("OnEnter",StatEntry_OnEnter);
 	t.tip:SetScript("OnLeave",ex.HideGTT);
-	t.tip:EnableMouse(true);
+	t.tip:EnableMouse(1);
 
 	entries[i] = t;
 end
 
 -- Scroll
-mod.scroll = CreateFrame("ScrollFrame","Examiner"..mod.token.."Scroll",mod.page,"FauxScrollFrameTemplate");
-mod.scroll:SetPoint("TOPLEFT",entries[1]);
-mod.scroll:SetPoint("BOTTOMRIGHT",entries[#entries],-3,-1);
-mod.scroll:SetScript("OnVerticalScroll",function(self,offset) FauxScrollFrame_OnVerticalScroll(self,offset,ITEM_HEIGHT,UpdateShownItems) end);
+local scroll = CreateFrame("ScrollFrame","ExaminerStatScroll",mod.page,"FauxScrollFrameTemplate");
+scroll:SetPoint("TOPLEFT",entries[1]);
+scroll:SetPoint("BOTTOMRIGHT",entries[#entries],-3,-1);
+scroll:SetScript("OnVerticalScroll",function(self,offset) FauxScrollFrame_OnVerticalScroll(self,offset,ITEM_HEIGHT,UpdateShownItems) end);

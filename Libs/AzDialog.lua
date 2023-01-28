@@ -16,6 +16,16 @@ local backdropEdit = { bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Inte
 --                                         Create the Dialog                                          --
 --------------------------------------------------------------------------------------------------------
 
+-- OnMouseDown
+local function Dialog_OnMouseDown(self)
+	self:StartMoving();
+end
+
+-- OnMouseUp
+local function Dialog_OnMouseUp(self)
+	self:StopMovingOrSizing();
+end
+
 -- OnOkay
 local function Dialog_OnOkay(self)
 	local dlg = self:GetParent();
@@ -38,16 +48,17 @@ end
 local function CreateDialog()
 	local index = (#dialogs + 1);
 	local f = CreateFrame("Frame",nil,UIParent);
-	f:SetSize(340,88);
+	f:SetWidth(340);
+	f:SetHeight(88);
 	f:SetBackdrop(backdrop);
 	f:SetBackdropColor(0.1,0.22,0.35,1.0);
 	f:SetBackdropBorderColor(0.1,0.1,0.1,1.0);
-	f:SetMovable(true);
-	f:EnableMouse(true);
-	f:SetToplevel(true);
+	f:SetMovable(1);
+	f:EnableMouse(1);
+	f:SetToplevel(1);
 	f:SetFrameStrata("DIALOG");
-	f:SetScript("OnMouseDown",f.StartMoving);
-	f:SetScript("OnMouseUp",f.StopMovingOrSizing);
+	f:SetScript("OnMouseDown",Dialog_OnMouseDown);
+	f:SetScript("OnMouseUp",Dialog_OnMouseUp);
 
 	f.header = f:CreateFontString(nil,"ARTWORK","GameFontHighlight");
 
@@ -64,12 +75,14 @@ local function CreateDialog()
 	f.edit:SetFontObject("GameFontHighlight");
 
 	f.cancel = CreateFrame("Button",nil,f,"UIPanelButtonTemplate");
-	f.cancel:SetSize(75,21);
+	f.cancel:SetWidth(75);
+	f.cancel:SetHeight(21);
 	f.cancel:SetScript("OnClick",Dialog_OnCancel);
 	f.cancel:SetText(CANCEL);
 
 	f.ok = CreateFrame("Button",nil,f,"UIPanelButtonTemplate");
-	f.ok:SetSize(75,21);
+	f.ok:SetWidth(75);
+	f.ok:SetHeight(21);
 	f.ok:SetPoint("RIGHT",f.cancel,"LEFT",-8,0);
 	f.ok:SetScript("OnClick",Dialog_OnOkay);
 	f.ok:SetText(OKAY);
@@ -82,7 +95,6 @@ end
 -- Show Dialog
 function AzDialog:Show(header,text,okayFunc,cancelFunc)
 	local dlg;
-
 	-- Find Free Dialog
 	for k, v in ipairs(dialogs) do
 		if (not v:IsShown()) then
@@ -90,17 +102,14 @@ function AzDialog:Show(header,text,okayFunc,cancelFunc)
 			break;
 		end
 	end
-
 	-- Create One
 	if (not dlg) then
 		dlg = CreateDialog();
 	end
-
 	-- Setup Frame
 	dlg.oldText = text;
 	dlg.okayFunc = okayFunc;
 	dlg.cancelFunc = cancelFunc;
-
 	-- Set Type
 	dlg.header:SetText(header or "Enter text here...");
 	if (text) then

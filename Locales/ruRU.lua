@@ -3,11 +3,31 @@
 --Updated to the new format in 3.0.*/WotLK by Hoofik of AshenVale (RU) 22.10.2008;
 --Russian localization by Darigaaz of SoulFlayer(RU), 3.09.2008 
 --
-if (GetLocale() ~= "ruRU") then
-	return;
-end
+if (GetLocale() == "ruRU") then
+--------------------------------------------------------------------------------------------------------
+--                                                Misc                                                --
+--------------------------------------------------------------------------------------------------------
 
-LibGearExam.Patterns = {
+BINDING_HEADER_EXAMINER = "Examiner";
+BINDING_NAME_EXAMINER_OPEN = "Открыть Examiner";
+BINDING_NAME_EXAMINER_TARGET = "Осмотреть цель";
+BINDING_NAME_EXAMINER_MOUSEOVER = "Осмотреть цель под курсором";
+
+Examiner.Classification = {
+	["worldboss"] = "Босс",
+	["rareelite"] = "Редкий элитный",
+	["elite"] = "Элитный",
+	["rare"] = "Редкий",
+};
+
+ExScanner.SetBonusTokenActive = "^Комплект: ";
+ExScanner.ItemUseToken = "^Использование: ";
+
+--------------------------------------------------------------------------------------------------------
+--                                           Stat Patterns                                            --
+--------------------------------------------------------------------------------------------------------
+
+ExScanner.Patterns = {
 	-- Base Stats --
 	{ p = "%+(%d+) к силе$", s = "STR" },
 	{ p = "%+(%d+) к ловкости", s = "AGI" },
@@ -159,9 +179,71 @@ LibGearExam.Patterns = {
 
 	-- Future Patterns (Disabled)
 	--{ p = "When struck in combat inflicts (%d+) .+ damage to the attacker.", s = "DMGSHIELD" },
-	
-		-- AQ Enchants --
-	{ p = "%+(%d+) к урону от темной магии", s = "SHADOWDMG" },
-	{ p = "%+(%d+) к урону от огня", s = "FIREDMG" },
-	{ p = "%+(%d+) к урону от магии льда", s = "FROSTDMG" },
 };
+
+--------------------------------------------------------------------------------------------------------
+--                                        Stat Order & Naming                                         --
+--------------------------------------------------------------------------------------------------------
+
+Examiner.StatEntryOrder = {
+	{ name = "Основные", stats = {"STR", "AGI", "STA", "INT", "SPI", "ARMOR"} },
+	{ name = "Жизнь и мана", stats = {"HP", "MP", "HP5", "MP5"} },
+	{ name = "Ближний и дальний бой", stats = {"AP", "RAP", "APFERAL", "CRIT", "HIT", "HASTE", "WPNDMG", "RANGEDDMG", "ARMORPENETRATION", "EXPERTISE"} },
+	{ name = "Магия", stats = {"HEAL", "SPELLDMG", "ARCANEDMG", "FIREDMG", "NATUREDMG", "FROSTDMG", "SHADOWDMG", "HOLYDMG", "SPELLCRIT", "SPELLHIT", "SPELLHASTE", "SPELLPENETRATION"} },
+	{ name = "Защита", stats = {"DEFENSE", "DODGE", "PARRY", "BLOCK", "BLOCKVALUE", "RESILIENCE"} },
+};
+
+ExScanner.StatNames = {
+	["STR"] = "Сила",
+	["AGI"] = "Ловкость",
+	["STA"] = "Выносливость",
+	["INT"] = "Интеллект",
+	["SPI"] = "Дух",
+
+	["ARMOR"] = "Броня",
+
+    ["ARCANERESIST"] = "Сопротивление тайной магии",
+    ["FIRERESIST"] = "Сопротивление огню",
+    ["NATURERESIST"] = "Сопротивление силам природы",
+    ["FROSTRESIST"] = "Сопротивление магии льда",
+    ["SHADOWRESIST"] = "Сопротивление темной магии",
+
+    ["DODGE"] = "Рейтинг уклонения",
+    ["PARRY"] = "Рейтинг парирования",
+    ["DEFENSE"] = "Рейтинг защиты",
+    ["BLOCK"] = "Рейтинг блокирования",
+    ["BLOCKVALUE"] = "Показатель блока щитом",
+    ["RESILIENCE"] = "Рейтинг устойчивости",
+
+    ["AP"] = "Сила атаки",
+    ["RAP"] = "Сила атаки дальнего боя",
+    ["APFERAL"] = "Сила атаки(зверь)",
+    ["CRIT"] = "Рейтинг крит. удара",
+    ["HIT"] = "Рейтинг меткости",
+    ["HASTE"] = "Рейтинг скорости боя",
+    ["WPNDMG"] = "К урону оружием",
+    ["RANGEDDMG"] = "К урону дальнего боя",
+    ["ARMORPENETRATION"] = "Рейт. игнорирования брони",
+    ["EXPERTISE"] = "Рейтинг мастерства",
+
+    ["SPELLCRIT"] = "Рейтинг крит. удара",
+    ["SPELLHIT"] = "Рейтинг меткости",
+    ["SPELLHASTE"] = "Рейтинг скорости боя",
+    ["SPELLPENETRATION"] = "Проникновение заклинаний",
+
+    ["HEAL"] = "Лечение",
+    ["SPELLDMG"] = "Урон заклинаниями",
+    ["ARCANEDMG"] = "Урон заклинаниями (тайная магия)",
+    ["FIREDMG"] = "Урон заклинаниями (огонь)",
+    ["NATUREDMG"] = "Урон заклинаниями (природа)",
+    ["FROSTDMG"] = "Урон заклинаниями (лед)",
+    ["SHADOWDMG"] = "Урон заклинаниями (темная магия)",
+    ["HOLYDMG"] = "Урон заклинаниями (свет)",
+
+	["HP"] = "Жизни",
+	["MP"] = "Мана",
+
+    ["HP5"] = "Регенерация здоровья",
+    ["MP5"] = "Восстановление маны",
+};
+end

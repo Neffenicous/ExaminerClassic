@@ -1,9 +1,20 @@
+if (GetLocale() == "zhTW") then
 --Upload zhTW localization by Pastor(夜空之歌), 2009/05/13
-if (GetLocale() ~= "zhTW") then
-	return;
-end
+--------------------------------------------------------------------------------------------------------
+--                                                Misc                                                --
+--------------------------------------------------------------------------------------------------------
 
-LibGearExam.Patterns = {
+BINDING_HEADER_EXAMINER = "檢視助手";
+BINDING_NAME_EXAMINER_OPEN = "開啟檢視助手";
+--BINDING_NAME_EXAMINER_TARGET = "觀察目標";
+BINDING_NAME_EXAMINER_TARGET = INSPECT.." "..TARGET;
+BINDING_NAME_EXAMINER_MOUSEOVER = "觀察滑鼠目標";
+
+--------------------------------------------------------------------------------------------------------
+--                                           Stat Patterns                                            --
+--------------------------------------------------------------------------------------------------------
+
+ExScanner.Patterns = {
 	--基本狀態--
 	{ p = "%+(%d+)力量", s = "STR" },
 	{ p = "%+(%d+)敏捷", s = "AGI" },
@@ -175,3 +186,70 @@ LibGearExam.Patterns = {
 	{ p = "^彈性編織襯底$", s = "AGI", v = 10 },--披風附魔(工程學)(待確認)
 	{ p = "^武裝者$", s = "PARRY", v = 10 },--手套附魔(待確認)
 };
+
+--------------------------------------------------------------------------------------------------------
+--                                        Stat Order & Naming                                         --
+--------------------------------------------------------------------------------------------------------
+--[[
+Examiner.StatEntryOrder = {
+	{ name = "基本屬性", stats = {"STR", "AGI", "STA", "INT", "SPI", "ARMOR"} },
+	{ name = "生命力 & 法力", stats = {"HP", "MP", "HP5", "MP5"} },
+	{ name = "基本等級", stats = {"CRIT", "HIT", "SPELLHIT", "HASTE"} },
+	{ name = "法術", stats = {"SPELLDMG", "ARCANEDMG", "FIREDMG", "NATUREDMG", "FROSTDMG", "SHADOWDMG", "HOLYDMG", "SPELLPENETRATION"} },
+	{ name = "近戰 & 遠程", stats = {"AP", "RAP",  "WPNDMG", "RANGEDDMG", "ARMORPENETRATION", "EXPERTISE"} },
+	{ name = "防禦", stats = {"DEFENSE", "DODGE", "PARRY", "BLOCK", "BLOCKVALUE", "RESILIENCE"} },
+};
+--]]
+ExScanner.StatNames = {
+	STR = "力量",
+	AGI = "敏捷",
+	STA = "耐力",
+	INT = "智力",
+	SPI = "精神",
+
+	ARMOR = "護甲",
+
+	ARCANERESIST = "秘法抗性",
+	FIRERESIST = "火焰抗性",
+	NATURERESIST = "自然抗性",
+	FROSTRESIST = "冰霜抗性",
+	SHADOWRESIST = "暗影抗性",
+
+	DODGE = "閃躲等級",
+	PARRY = "招架等級",
+	DEFENSE = "防禦等級",
+	BLOCK = "格擋等級",
+	BLOCKVALUE = "格擋值",
+	RESILIENCE = "韌性等級",
+
+	AP = "攻擊強度",
+	RAP = "遠程攻擊強度",
+	CRIT = "致命一擊等級",
+	HIT = "命中等級",
+	HASTE = "加速等級",
+	WPNDMG = "武器傷害",
+	RANGEDDMG = "遠程傷害",
+	ARMORPENETRATION = "護甲穿透等級",
+	EXPERTISE = "熟練等級",
+
+	SPELLCRIT = "法術致命等級",
+	SPELLHIT = "法術命中等級",
+	SPELLHASTE = "法術加速等級",
+	SPELLPENETRATION = "法術穿透力",
+
+	HEAL = "治療量",
+	SPELLDMG = "法術能量",
+	ARCANEDMG = "法術傷害 (秘法)",
+	FIREDMG = "法術傷害 (火焰)",
+	NATUREDMG = "法術傷害 (自然)",
+	FROSTDMG = "法術傷害 (冰霜)",
+	SHADOWDMG = "法術傷害 (暗影)",
+	HOLYDMG = "法術傷害 (神聖)",
+
+	HP = "生命力",
+	MP = "法力",
+
+	HP5 = "生命力回復",
+	MP5 = "法力回復",
+};
+end

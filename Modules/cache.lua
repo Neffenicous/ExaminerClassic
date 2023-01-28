@@ -1,22 +1,17 @@
 local ex = Examiner;
-local cfg, cache;
 
 -- Module
-local mod = ex:CreateModule("Cache","Cached Players");
-mod.help = "Right Click for extended menu";
+local mod = ex:CreateModule("Cache");
 mod:CreatePage(false,"");
-mod:HasButton(true);
+mod:CreateButton("Cache","Cached Players","Right Click for extended menu");
 
 -- Variables
 local cacheSortMethods = { "none", "name", "realm", "level", "guild", "race", "class", "time" };
-local NUM_BUTTONS = 10;
-local BUTTON_HEIGHT = (240 / NUM_BUTTONS);
-local activeCacheList = {};
+local BUTTON_HEIGHT = 24;
+local cfg, cache;
+local ExCacheList = {};
 local buttons = {};
-
--- Expose these tables
 mod.cacheSortMethods = cacheSortMethods;
-mod.activeCacheList = activeCacheList;
 
 -- Filtering
 local levelPattern = "%s(%d*)(%-)(%d*)%s";
@@ -28,8 +23,8 @@ local filterList = {};
 local CLASS_COLORS = CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS;
 
 -- RaceCoords. For females, add 0.5 to "top" and "bottom".
--- http://i.imgur.com/VR5Xy.png -- Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Races
-local RACE_COORD = {
+-- Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Races
+local EX_RaceCoord = {
 	Human		= { left = 0/8, right = 1/8, top = 0/4, bottom = 1/4 },
 	Dwarf		= { left = 1/8, right = 2/8, top = 0/4, bottom = 1/4 },
 	Gnome		= { left = 2/8, right = 3/8, top = 0/4, bottom = 1/4 },
@@ -43,14 +38,14 @@ local RACE_COORD = {
 };
 
 -- Dialog Func
-local CacheFilterOkayFunc = function(text) cfg.cacheFilter = text; mod:BuildCacheList(); ex:SendModuleEvent("OnConfigChanged","cacheFilter",text); end
+local CacheFilterOkayFunc = function(text) cfg.cacheFilter = text; mod:BuildCacheList(); end
 
 -- Page: OnShow
-mod.page:SetScript("OnShow",function(self) if (#activeCacheList == 0) then mod:BuildCacheList(); end end);
+mod.page:SetScript("OnShow",function(self) if (#ExCacheList == 0) then mod:BuildCacheList(); end end);
 
 -- HOOK: Slash Command "clearcache"
-local oldClearCacheFunc = ex.slashCommands.clearcache;
-ex.slashCommands.clearcache = function(cmd) oldClearCacheFunc(cmd); mod:BuildCacheList(); end
+local oldClearCacheFunc = ex.slashFuncs.clearcache;
+ex.slashFuncs.clearcache = function(cmd) oldClearCacheFunc(cmd); mod:BuildCacheList(); end
 
 --------------------------------------------------------------------------------------------------------
 --                                           Module Scripts                                           --
@@ -58,7 +53,7 @@ ex.slashCommands.clearcache = function(cmd) oldClearCacheFunc(cmd); mod:BuildCac
 
 -- OnInitialize
 function mod:OnInitialize()
-	cfg = ex.cfg;
+	cfg = Examiner_Config;
 	cache = Examiner_Cache;
 	-- Defaults
 	cfg.cacheSort = cfg.cacheSort or "class";
@@ -66,7 +61,7 @@ function mod:OnInitialize()
 end
 
 -- OnButtonClick
-function mod:OnButtonClick(frame,button)
+function mod:OnButtonClick(button)
 	-- left
 	if (button == "LeftButton") then
 		if (IsShiftKeyDown()) then
@@ -82,10 +77,10 @@ end
 
 -- OnCache -- Clear the cache list if this page isn't shown, to invalidate it
 function mod:OnCache(entry)
-	if (self:IsShown()) then
+	if (self.index == cfg.activePage) then
 		self:BuildCacheList();
 	else
-		wipe(activeCacheList);
+		wipe(ExCacheList);
 	end
 end
 
@@ -119,7 +114,7 @@ end
 
 -- Deletes all the shown entries
 local function DeleteShownCache()
-	for index, entryName in ipairs(activeCacheList) do
+	for index, entryName in ipairs(ExCacheList) do
 		cache[entryName] = nil;
 	end
 	mod:BuildCacheList();
@@ -128,7 +123,7 @@ end
 -- Deletes all the hidden entries
 local function DeleteHiddenCache()
 	for entryName in next, cache do
-		if (not IndexOf(activeCacheList,entryName)) then
+		if (not IndexOf(ExCacheList,entryName)) then
 			cache[entryName] = nil;
 		end
 	end
@@ -141,7 +136,7 @@ end
 
 -- Menu Init Items
 function mod.MenuInit(parent,list)
-	if (mod:IsShown()) then
+	if (mod.index ~= cfg.activePage) then
 		mod:BuildCacheList();
 	end
 	-- filter
@@ -159,7 +154,7 @@ function mod.MenuInit(parent,list)
 	tbl = list[#list + 1]; tbl.header = 1;
 	tbl = list[#list + 1]; tbl.text = "Cache"; tbl.header = 1;
 	tbl = list[#list + 1]; tbl.text = "Delete All Entries"; tbl.value = 2;
-	if (#activeCacheList ~= GetTableEntries(cache)) then
+	if (#ExCacheList ~= GetTableEntries(cache)) then
 		tbl = list[#list + 1]; tbl.text = "Delete Shown Entries"; tbl.value = 3;
 		tbl = list[#list + 1]; tbl.text = "Delete Hidden Entries"; tbl.value = 4;
 	end
@@ -179,9 +174,9 @@ function mod.MenuSelect(parent,entry)
 	elseif (entry.value == 2) then
 		AzDialog:Show("Are you sure you want to delete |cffffff80"..GetTableEntries(cache).."|r cached entries?",nil,DeleteAllCache);
 	elseif (entry.value == 3) then
-		AzDialog:Show("Sure you want to delete the |cffffff80"..#activeCacheList.."|r shown cache entries?",nil,DeleteShownCache);
+		AzDialog:Show("Sure you want to delete the |cffffff80"..#ExCacheList.."|r shown cache entries?",nil,DeleteShownCache);
 	elseif (entry.value == 4) then
-		AzDialog:Show("Sure you want to delete the |cffffff80"..(GetTableEntries(cache) - #activeCacheList).."|r hidden cache entries?",nil,DeleteHiddenCache);
+		AzDialog:Show("Sure you want to delete the |cffffff80"..(GetTableEntries(cache) - #ExCacheList).."|r hidden cache entries?",nil,DeleteHiddenCache);
 	end
 	-- Rebuild Cache List
 	if (entry.value ~= 1) then
@@ -190,25 +185,27 @@ function mod.MenuSelect(parent,entry)
 end
 
 --------------------------------------------------------------------------------------------------------
---                                        Cache Code Functions                                        --
+--                                            Cache Stuff                                             --
 --------------------------------------------------------------------------------------------------------
 
 -- CacheEntry: OnClick
 local function CacheEntry_OnClick(self,button)
 	if (button == "LeftButton") then
-		local editBox = ChatEdit_GetActiveWindow();
+		local editBox = ChatEdit_GetActiveWindow(); 
 		if (editBox) and (IsModifiedClick("CHATLINK")) and (editBox:IsVisible()) then
 			local entry = cache[self.entryName];
 			editBox:Insert(format("%s, %d %s%s",self.entryName,entry.level,entry.class,(entry.guild and " of <"..entry.guild..">" or "")));
 		else
-			-- Go to previous page
-			if (not IsShiftKeyDown()) then
-				cfg.activePage = cfg.prevPage;
-				mod.page:Hide();
-			end
-			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);	-- "igMainMenuOptionCheckBoxOn"
+			PlaySound("igMainMenuOptionCheckBoxOn");
 			ex:ClearInspect();
 			ex:LoadPlayerFromCache(self.entryName);
+			-- Show Stats page if that module exists
+			if (not IsShiftKeyDown()) then
+				local mod = ex:GetModuleFromToken("Stats");
+				if (mod) then
+					ex:ShowModulePage(mod.index);
+				end
+			end
 		end
 	elseif (button == "RightButton") and (IsShiftKeyDown()) then
 		cache[self.entryName] = nil;
@@ -228,11 +225,11 @@ local function CacheEntry_OnEnter(self,motion)
 	-- Add Lines & Show
 	GameTooltip:AddLine(entry.pvpName..(entry.realm and " - "..entry.realm or ""),0.5,0.75,1.0);
 	if (entry.guild) then
-		GameTooltip:AddLine("<"..entry.guild.."> |cffc0c0c0"..entry.guildRank,0.0,0.5,0.8);
+		GameTooltip:AddLine("<"..entry.guild..">",0.0,0.5,0.8);
 	end
-	GameTooltip:AddLine(level.."  "..entry.race.." "..classText,1,1,1);
+	GameTooltip:AddLine(level.." "..entry.race.." "..classText,1,1,1);
 	GameTooltip:AddLine(entry.zone,1,1,1);
-	GameTooltip:AddLine(ex:FormatTime(time() - entry.time).." ago");
+	GameTooltip:AddLine(ex:FormatTime(time() - entry.time));
 	GameTooltip:AddLine(date("%a, %b %d, %Y - %H:%M:%S",entry.time));
 	GameTooltip:AddLine("<Shift + Right-Click to Delete>",0.7,0.7,0.7);
 	GameTooltip:Show();
@@ -254,36 +251,28 @@ local function CacheListSortFunc(a,b)
 end
 
 -- ScrollBar: Cache list update
-local function UpdateShownItems(self)
-	buttons[1]:SetWidth(#activeCacheList > #buttons and 200 or 216);
-	FauxScrollFrame_Update(self,#activeCacheList,#buttons,BUTTON_HEIGHT);
+local function UpdateShownItems()
+	buttons[1]:SetWidth(#ExCacheList > #buttons and 200 or 216);
+	FauxScrollFrame_Update(ExaminerCacheScroll,#ExCacheList,#buttons,BUTTON_HEIGHT);
 	local gttOwner = GameTooltip:GetOwner();
-	local index = self.offset;
+	local index = ExaminerCacheScroll.offset;
 	for i = 1, #buttons do
 		index = (index + 1);
 		local button = buttons[i];
-		if (activeCacheList[index]) then
-			local entryName = activeCacheList[index];
+		if (ExCacheList[index]) then
+			local entryName = ExCacheList[index];
 			local entry = cache[entryName];
 			local color = CLASS_COLORS[entry.classFixed];
 
 			button.entryName = entryName;
-			button.name:SetFormattedText("|cffffffff%s|r %s%s",(entry.level ~= -1 and entry.level or "??"),entry.name,entry.realm and "|cffffff00*" or "");
+			button.name:SetFormattedText("|cffffffff%s|r %s",(entry.level ~= -1 and entry.level or "??"),entry.name);
 			button.name:SetTextColor(color.r,color.g,color.b);
 
-			local valueText;
-			if (cfg.cacheSort == "name") then
-				valueText = "";
-			elseif (cfg.cacheSort == "time") then
-				valueText = ex:FormatTime(time() - entry.time,true);
-			else
-				valueText = entry[cfg.cacheSort];
-			end
-			button.value:SetText(valueText);
+			button.value:SetText(cfg.cacheSort ~= "name" and entry[cfg.cacheSort]);
 
-			local coords = RACE_COORD[entry.raceFixed] or RACE_COORD.Human;	-- Default to Human to avoid error in case of new race in the future
+			local coords = EX_RaceCoord[entry.raceFixed];
 			local iconOffset = (entry.sex == 3 and 0.5 or 0);
-			button.race:SetTexCoord(coords.left + 0.01,coords.right - 0.006,coords.top + iconOffset + 0.014,coords.bottom + iconOffset - 0.013);
+			button.race:SetTexCoord(coords.left,coords.right,coords.top + iconOffset,coords.bottom + iconOffset);
 
 			-- Update Tooltip
 			if (button == gttOwner) then
@@ -300,7 +289,7 @@ end
 -- Include Filtered Entry
 local function IncludeFilteredEntry(entry,filter,lvlMin,lvlHyphen,lvlMax)
 	local include = true;
-	-- Show Alts
+	-- Show Alt
 	include = (include) and (not cfg.cacheShowAlts or cfg.cacheShowAlts and entry.isSelf);
 	-- List Pattern
 	for type, string in next, filterList do
@@ -336,19 +325,19 @@ function mod:BuildCacheList()
 	filter = filter:gsub(levelPattern,""):gsub(numberPattern,""):gsub(listPattern,""):trim():lower();
 	local notFiltered = (filter == "" and not cfg.cacheShowAlts and not lvlMin and not lvlMax and not next(filterList));
 	-- Create Display Table
-	wipe(activeCacheList);
+	wipe(ExCacheList);
 	for entryName, entry in next, cache do
 		if (notFiltered) or (IncludeFilteredEntry(entry,filter,lvlMin,lvlHyphen,lvlMax)) then
-			activeCacheList[#activeCacheList + 1] = entryName;
+			ExCacheList[#ExCacheList + 1] = entryName;
 		end
 	end
 	-- Sort
 	if (cfg.cacheSort ~= "none") then
-		sort(activeCacheList,CacheListSortFunc);
+		sort(ExCacheList,CacheListSortFunc);
 	end
 	-- Update
-	self.page.header:SetFormattedText("Cached Players (%d)%s",#activeCacheList,(notFiltered and "" or " |cffffff00*"));
-	UpdateShownItems(self.scroll);
+	self.page.header:SetFormattedText("Cached Players (%d)%s",#ExCacheList,(notFiltered and "" or " |cffffff00*"));
+	UpdateShownItems();
 	wipe(filterList);
 end
 
@@ -357,9 +346,10 @@ end
 --------------------------------------------------------------------------------------------------------
 
 -- Cache Entries
-for i = 1, NUM_BUTTONS do
+for i = 1, 10 do
 	local btn = CreateFrame("Button",nil,mod.page);
-	btn:SetSize(200,BUTTON_HEIGHT);
+	btn:SetWidth(200);
+	btn:SetHeight(BUTTON_HEIGHT);
 	btn:RegisterForClicks("LeftButtonDown","RightButtonDown");
 	btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight");
 	btn.id = i;
@@ -378,7 +368,8 @@ for i = 1, NUM_BUTTONS do
 	btn.race = btn:CreateTexture(nil,"ARTWORK");
 	btn.race:SetTexture("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Races");
 	btn.race:SetPoint("LEFT",3,0);
-	btn.race:SetSize(BUTTON_HEIGHT - 2,BUTTON_HEIGHT - 2);
+	btn.race:SetWidth(BUTTON_HEIGHT - 2);
+	btn.race:SetHeight(BUTTON_HEIGHT - 2);
 
 	btn.name = btn:CreateFontString(nil,"ARTWORK","GameFontHighlight");
 	btn.name:SetPoint("LEFT",btn.race,"RIGHT",3,0);
@@ -393,7 +384,7 @@ for i = 1, NUM_BUTTONS do
 end
 
 -- Cache Scroll
-mod.scroll = CreateFrame("ScrollFrame","Examiner"..mod.token.."Scroll",mod.page,"FauxScrollFrameTemplate");
-mod.scroll:SetPoint("TOPLEFT",buttons[1]);
-mod.scroll:SetPoint("BOTTOMRIGHT",buttons[#buttons],-3,-1);
-mod.scroll:SetScript("OnVerticalScroll",function(self,offset) FauxScrollFrame_OnVerticalScroll(self,offset,BUTTON_HEIGHT,UpdateShownItems) end);
+local scroll = CreateFrame("ScrollFrame","ExaminerCacheScroll",mod.page,"FauxScrollFrameTemplate");
+scroll:SetPoint("TOPLEFT",buttons[1]);
+scroll:SetPoint("BOTTOMRIGHT",buttons[#buttons],-3,-1);
+scroll:SetScript("OnVerticalScroll",function(self,offset) FauxScrollFrame_OnVerticalScroll(self,offset,BUTTON_HEIGHT,UpdateShownItems) end);

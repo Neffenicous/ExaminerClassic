@@ -1,12 +1,9 @@
 local ex = Examiner;
-local cfg;
-
-
 
 -- Module
-local mod = ex:CreateModule("Config","Configurations");
-mod.help = "Examiner Settings";
+local mod = ex:CreateModule("Config");
 mod:CreatePage(false,"Configurations");
+mod:CreateButton("Config","Configurations","Examiner Settings");
 
 -- Create Version String
 local modName = ex:GetName();
@@ -15,6 +12,7 @@ vers:SetText(modName.." |cffffff80"..GetAddOnMetadata(modName,"Version"));
 vers:SetPoint("BOTTOM",0,14);
 
 -- Variables
+local cfg;
 local checkBtns = {};
 
 --------------------------------------------------------------------------------------------------------
@@ -24,7 +22,7 @@ local checkBtns = {};
 -- CheckBoxes: OnClick
 local function ConfigCheckBox_OnClick(self,button)
 	local var = ex.options[self.id].var;
-	cfg[var] = (self:GetChecked() and true or false);		-- WoD patch made GetChecked() return bool instead of 1/nil
+	cfg[var] = (self:GetChecked() ~= nil);
 	-- Special "makeMovable" handling -- Must not invoke the OnHide event!
 	if (var == "makeMovable") then
 		local onHide = ex:GetScript("OnHide");
@@ -39,10 +37,12 @@ local function ConfigCheckBox_OnClick(self,button)
 		end
 		ex:SetScript("OnHide",onHide);
 	end
-
 	-- Post Change to Modules
-	ex:SendModuleEvent("OnConfigChanged",var,cfg[var]);
-	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+	for index, mod in ipairs(ex.modules) do
+		if (mod.OnConfigChanged) then
+			mod:OnConfigChanged(var,cfg[var]);
+		end
+	end
 end
 
 -- CheckBoxes: OnEnter
@@ -82,17 +82,16 @@ end
 
 -- OnInitialize
 function mod:OnInitialize()
-	cfg = ex.cfg;
-
+	cfg = Examiner_Config;
 	-- DropDown
-	self.dropDown = AzDropDown:CreateDropDown(self.page,-190,MenuInit,MenuSelect,false,false);
-	self.dropDown:SetPoint("TOP",0,-40);
-	self.dropDown:SetText("Enabled Module Caching...");
-
+	local dropDown = AzDropDown.CreateDropDown(self.page,190,false,MenuInit,MenuSelect);
+	dropDown:SetPoint("TOP",0,-40);
+	dropDown.label:SetText("Enabled Module Caching...");
 	-- Check Boxes
 	for index, option in ipairs(ex.options) do
 		local chk = CreateFrame("CheckButton",nil,mod.page);
-		chk:SetSize(21,21);
+		chk:SetWidth(24);
+		chk:SetHeight(24);
 		chk:SetScript("OnClick",ConfigCheckBox_OnClick);
 		chk:SetScript("OnEnter",ConfigCheckBox_OnEnter);
 		chk:SetScript("OnLeave",ex.HideGTT);
@@ -111,23 +110,13 @@ function mod:OnInitialize()
 		chk:SetHitRectInsets(0,chk.text:GetWidth() * -1,0,0);
 
 		chk.id = index;
-		chk.var = option.var;
 
 		if (index == 1) then
 			chk:SetPoint("TOPLEFT",20,-70);
 		else
-			chk:SetPoint("TOP",checkBtns[index - 1],"BOTTOM",0,2);
+			chk:SetPoint("TOP",checkBtns[index - 1],"BOTTOM");
 		end
 
 		checkBtns[index] = chk;
-	end
-end
-
--- OnConfigChanged
-function mod:OnConfigChanged(var,value)
-	for index, chk in ipairs(checkBtns) do
-		if (chk.var == var) then
-			chk:SetChecked(cfg[var]);
-		end
 	end
 end

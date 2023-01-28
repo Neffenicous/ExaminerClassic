@@ -1,10 +1,13 @@
--- For enchant and gem IDs, check out the following link: https://fr.classic.wowhead.com/enchanting
--- Pattern entries marked with an "alert" value will cause Examiner to show a warning message,
--- { p = "Pattern", s = "Category", alert = 1 },
--- telling that the pattern is thought of as no longer in use. These patterns should eventually be deleted.
--- Modified by Grome of EU-Sulfuron for patch 1.13.2 September 26th 2019
+BINDING_HEADER_EXAMINER = "Examiner";
+BINDING_NAME_EXAMINER_OPEN = "Open Examiner";
+BINDING_NAME_EXAMINER_TARGET = INSPECT.." "..TARGET;
+BINDING_NAME_EXAMINER_MOUSEOVER = INSPECT.." Mouseover";
 
-LibGearExam.Patterns = {
+--------------------------------------------------------------------------------------------------------
+--                                           Stat Patterns                                            --
+--------------------------------------------------------------------------------------------------------
+
+ExScanner.Patterns = {
 	--  Base Stats  --
 	{ p = "([+-]%d+) Strength", s = "STR" },
 	{ p = "([+-]%d+) Agility", s = "AGI" },
@@ -136,10 +139,27 @@ LibGearExam.Patterns = {
 	-- Void Star Talisman (Warlock T5 Class Trinket)
 	{ p = "Increases your pet's resistances by 130 and increases your spell power by 48%.", s = "SPELLDMG", v = 48 },
 
-	
+	-- Temp Enchants (Disabled as they are not part of "gear" stats)
+	--{ p = "Minor Mana Oil", s = "MP5", v = 4 },
+	--{ p = "Lesser Mana Oil", s = "MP5", v = 8 },
+	--{ p = "Superior Mana Oil", s = "MP5", v = 14 },
+	--{ p = "Brilliant Mana Oil", s = { "MP5", "HEAL" }, v = { 12, 25 } },
+
+	--{ p = "Minor Wizard Oil", s = "SPELLDMG", v = 8 },
+	--{ p = "Lesser Wizard Oil", s = "SPELLDMG", v = 16 },
+	--{ p = "Wizard Oil", s = "SPELLDMG", v = 24 },
+	--{ p = "Superior Wizard Oil", s = "SPELLDMG", v = 42 },
+	--{ p = "Brilliant Wizard Oil", s = { "SPELLDMG", "SPELLCRIT" }, v = { 36, 14 } },
+
+	-- Future Patterns (Disabled)
+	--{ p = "When struck in combat inflicts (%d+) .+ damage to the attacker.", s = "DMGSHIELD" },
 };
 
-LibGearExam.StatNames = {
+--------------------------------------------------------------------------------------------------------
+--                                             Stat Names                                             --
+--------------------------------------------------------------------------------------------------------
+
+ExScanner.StatNames = {
 	STR = "Strength",
 	AGI = "Agility",
 	STA = "Stamina",
@@ -194,16 +214,4 @@ LibGearExam.StatNames = {
 
 	HP5 = "Health Regen Per 5 Sec",
 	MP5 = "Mana Regen Per 5 Sec",
-	
-	-- Skill Bonuses
-	DAGGERSKILL = "Daggers Skill Bonus",
-	ONEAXESKILL = "Axes Skill Bonus",
-	TWOAXESKILL = "Two-Handed Axes Skill Bonus",
-	ONESWORDSKILL = "Swords Skill Bonus",
-	TWOSWORDSKILL = "Two-Handed Swords Skill Bonus",
-	ONEMACESKILL = "Maces Skill Bonus",
-	TWOMACESKILL = "Two-Handed Maces Skill Bonus",
-	BOWSKILL = "Bows skill Bonus",
-	GUNSSKILL = "Guns skill Bonus",
-	CROSSBOWSKILL = "Crossbows Skill Bonus",
 };

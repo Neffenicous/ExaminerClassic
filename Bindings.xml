@@ -6,10 +6,10 @@
 		if (Examiner:IsShown()) then
 			HideUIPanel(Examiner);
 		else
-			Examiner:DoInspect("target");
+			Examiner.InspectUnit("target");
 		end
 	</Binding>
 	<Binding name="EXAMINER_MOUSEOVER">
-		Examiner:InspectMouseover();
+		Examiner:InspectMouseover();		
 	</Binding>
 </Bindings>
