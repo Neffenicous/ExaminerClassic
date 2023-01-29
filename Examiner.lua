@@ -40,7 +40,7 @@ local TALENT_BACKGROUNDS = {
 	"DeathKnightBlood", "DeathKnightFrost", "DeathKnightUnholy",
 	"DruidBalance", "DruidFeralCombat", "DruidRestoration",
 	"HunterBeastMastery", "HunterMarksmanship", "HunterSurvival",
---	"HunterPetCunning", "HunterPetFerocity", "HunterPetTenacity",
+    -- "HunterPetCunning", "HunterPetFerocity", "HunterPetTenacity",
 	"MageArcane", "MageFire", "MageFrost",
 	"PaladinCombat", "PaladinHoly", "PaladinProtection",
 	"PriestDiscipline", "PriestHoly", "PriestShadow",
@@ -55,7 +55,7 @@ ex.options = {
 	{ var = "makeMovable", default = false, label = "Make Examiner Movable", tip = "To freely move Examiner around, enable this option, otherwise it will behave like a normal frame, such as the Quest Log or Spellbook" },
 	{ var = "autoInspect", default = true, label = "Auto Inspect on Target Change", tip = "With this option turned on, Examiner will automatically inspect your new target when you change it." },
 	{ var = "clearInspectOnHide", default = false, label = "Clear Inspect Data on Hide", tip = "When Examiner gets hidden, this option will clear inspection data, thus freeing up some memory." },
-	-- { var = "percentRatings", default = false, label = "Show Ratings in Percentage *", tip = "* = Not working in WoD.\nWith this option enabled, ratings will be displayed in percent relative to the inspected person's level." },
+	{ var = "percentRatings", default = true, label = "Show Ratings in Percentage", tip = "With this option enabled, ratings will be displayed in percent relative to the inspected person's level." },
 	{ var = "combineAdditiveStats", default = true, label = "Combine Additive Stats", tip = "This option will combine certain stats which stacks with others.\n- Spell Power to specific schools\n- Intellect to Spell Power\n- AP to Ranged AP" },
 	{ var = "tooltipSmartAnchor", default = false, label = "Fixed Tooltip Anchor", tip = "Instead of showing item tooltips next to the item button, it will place it next to the Examiner window, in a fixed position" },
 };
@@ -179,20 +179,20 @@ function ex:VARIABLES_LOADED(event)
 end
 
 -- Target Unit Changed
-function ex:PLAYER_TARGET_CHANGED(event)
-	if (cfg.autoInspect) and (UnitExists("target")) then
-		self:DoInspect("target");
-			if _G.Details and (UnitIsPlayer("target")) then
-				InspectFrame = Examiner
-				Details:ShowTalentsPanel()
-			elseif _G.Details then
-				DetailsTalentFrame:Hide();
-			end
-	elseif (self.unit == "target") then
-		self.unit = nil;
-		self:SetScript("OnUpdate",nil);
-	end
-end
+-- function ex:PLAYER_TARGET_CHANGED(event)
+-- 	if (cfg.autoInspect) and (UnitExists("target")) then
+-- 		self:DoInspect("target");
+-- 			if _G.Details and (UnitIsPlayer("target")) then
+-- 				InspectFrame = Examiner
+-- 				Details:ShowTalentsPanel()
+-- 			elseif _G.Details then
+-- 				DetailsTalentFrame:Hide();
+-- 			end
+-- 	elseif (self.unit == "target") then
+-- 		self.unit = nil;
+-- 		self:SetScript("OnUpdate",nil);
+-- 	end
+-- end
 
 -- Mouseover Unit Changed
 function ex:UPDATE_MOUSEOVER_UNIT(event)
@@ -755,11 +755,11 @@ function ex:DoInspect(unit,openFlag)
 			self.modules[cfg.activePage].page:Hide();	-- Az: this is slightly bad to do, what if a module still have data to show? feats still work outside inspect range for example
 		end
 		-- show talents
-		if (openFlag ~= false) and _G.Details and (UnitIsPlayer("target")) and (not self:IsShown()) then
-    		self:Display();
-    		InspectFrame = Examiner
-    		Details:ShowTalentsPanel()
-		end
+		-- if (openFlag ~= false) and _G.Details and (UnitIsPlayer("target")) and (not self:IsShown()) then
+    	-- 	self:Display();
+    	-- 	InspectFrame = Examiner
+    	-- 	Details:ShowTalentsPanel()
+		-- end
 		-- Outside range, monitor range and inspect as soon as they are in range
 		if (not CheckInteractDistance(unit,3)) then
 			self:SetScript("OnUpdate",Examiner_OnUpdate);

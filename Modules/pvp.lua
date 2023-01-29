@@ -188,7 +188,7 @@ mod.rankIcon.texture:SetAllPoints();
 -- Rank Bar
 local rankStart = 0
 local rankEnd = 100
-mod.rankBar = CreateFrame("StatusBar",nil,mod.page);
+mod.rankBar = CreateFrame("StatusBar",nil,mod.page, "BackdropTemplate");
 mod.rankBar:SetPoint("TOPLEFT",17,-15);
 mod.rankBar:SetWidth(200);
 mod.rankBar:SetHeight(20);
@@ -204,7 +204,7 @@ mod.rankBar.Text = mod.rankBar:CreateFontString(nil,"ARTWORK")
 mod.rankBar.Text:SetFont(GameFontNormal:GetFont(), 13, "OUTLINE")
 mod.rankBar.Text:SetPoint("CENTER",0,0)
 mod.rankBar.Text:SetTextColor(1,1,0);
-mod.rankBar.Border = CreateFrame("Frame", nil, mod.rankBar)
+mod.rankBar.Border = CreateFrame("Frame", nil, mod.rankBar, "BackdropTemplate")
 mod.rankBar.Border:SetPoint("TOPLEFT", mod.rankBar, "TOPLEFT", -2, 2)
 mod.rankBar.Border:SetPoint("BOTTOMRIGHT", mod.rankBar, "BOTTOMRIGHT", 2, -2)
 mod.rankBar.Border:SetBackdrop({ 

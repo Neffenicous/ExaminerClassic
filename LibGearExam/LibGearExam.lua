@@ -92,7 +92,7 @@ LGE.StatNames = {
 	SPELLHASTE = "Spell Haste Rating",
 	SPELLPENETRATION = "Spell Penetration",
 
-	HEAL = "Healing",
+	-- HEAL = "Healing",
 	SPELLDMG = "Spell Power",
 	ARCANEDMG = "Spell Power (Arcane)",
 	FIREDMG = "Spell Power (Fire)",
@@ -178,14 +178,13 @@ LGE.StatRatingBaseTable = {
 	HASTE = 10,
 	HIT = 10,
 	CRIT = 14,
-	EXPERTISE = 2.5,
+	EXPERTISE = 10.369018,
 	DEFENSE = 1.5,
 	DODGE = 13.8,	-- Patch 3.2: Increased 15% from 12
 	PARRY = 13.8,	-- Patch 3.2: Reduced 8% from 15
 	BLOCK = 5,
 	RESILIENCE = 28.75,	-- Patch 3.2: Increased 15% from 25
-	ARMORPENETRATION = 4.69512176513672 / 1.25 * 1.12,		-- Patch 3.1 Quote:		"All classes now receive 25% more benefit from Armor Penetration Rating."
-															-- Patch 3.2.2 Quote:	"The amount of armor penetration gained per point of this rating has been reduced by 12%."
+	ARMORPENETRATION = 4.69512176513672 / 1.25 * 1.12
 };
 
 --------------------------------------------------------------------------------------------------------
@@ -403,9 +402,9 @@ function LGE:GetStatValue(statToken,statTable,compareTable,level,combineAdditive
 		if (statToken == "SPELLDMG") and (statTable["INT"]) then
 		--	value = (value + statTable["INT"]);	Intellect does not give spellpower in classic.
 		end
-		if (statToken == "HEAL") and (statTable["SPELLDMG"]) then
-			value = (value + statTable["SPELLDMG"]);	-- spelldmg is also healing power though. tested on mage and paladin
-		end
+		-- if (statToken == "HEAL") and (statTable["SPELLDMG"]) then
+		-- 	value = (value + statTable["SPELLDMG"]);	-- spelldmg is also healing power though. tested on mage and paladin
+		-- end
 		if (statToken == "RAP") and (statTable["AP"]) then
 			value = (value + statTable["AP"]);
 		end
@@ -442,7 +441,7 @@ function LGE:GetStatValue(statToken,statTable,compareTable,level,combineAdditive
 		 -- do we color it ? "%" looks out of place...
 		if (self.StatRatingBaseTable[statToken]) then
 			local color = "|cff80ff80";
-			value = color..value.."%";
+			value = color..value;
 		end	
 		return value, valuePct;
 	end

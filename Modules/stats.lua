@@ -15,36 +15,14 @@ local displayList = {};
 local resists = {};
 local entries = {};
 
--- Stat Entry Order
+-- Stat Entry Order -- Item 0 is the header for the group
 local StatEntryOrder = {
-	{ [0] = PLAYERSTAT_BASE_STATS, "STR", "AGI", "STA", "INT", "SPI", "ARMOR" },
+	{ [0] = PLAYERSTAT_BASE_STATS, "STR", "AGI", "STA", "INT", "SPI", "ARMOR", "MASTERY" },
 	{ [0] = HEALTH.." & "..MANA, "HP", "MP", "HP5", "MP5" },
-	{ [0] = PLAYERSTAT_SPELL_COMBAT.." "..STATS_LABEL:gsub(":",""), "HEAL", "SPELLDMG", "ARCANEDMG", "FIREDMG", "NATUREDMG", "FROSTDMG", "SHADOWDMG", "HOLYDMG", "SPELLCRIT", "SPELLHIT", "SPELLHASTE", "SPELLPENETRATION" },
-	{ [0] = MELEE.." & "..RANGED, "AP", "RAP", "CRIT", "HIT", "HASTE", "ARMORPENETRATION", "EXPERTISE", "WPNDMG", "RANGEDDMG" },
+	{ [0] = PLAYERSTAT_SPELL_COMBAT.." "..STATS_LABEL:gsub(":",""), "SPELLDMG", "ARCANEDMG", "FIREDMG", "NATUREDMG", "FROSTDMG", "SHADOWDMG", "HOLYDMG", "SPELLCRIT", "SPELLHIT", "SPELLHASTE", "SPELLPENETRATION" },
+	{ [0] = MELEE.." & "..RANGED, "AP", "RAP", "CRIT", "HIT", "HASTE", "ARMORPENETRATION", "EXPERTISE", "WPNDMG", "RANGEDDMG", "DAGGERSKILL", "ONEAXESKILL", "TWOAXESKILL", "ONESWORDSKILL", "TWOSWORDSKILL", "ONEMACESKILL", "TWOMACESKILL", "BOWSKILL", "GUNSSKILL", "CROSSBOWSKILL" },
 	{ [0] = PLAYERSTAT_DEFENSES, "DEFENSE", "DODGE", "PARRY", "BLOCK", "BLOCKVALUE", "RESILIENCE" },
 };
-
-
-ex.slashHelp[#ex.slashHelp + 1] = " |2fixcacheitemlevels|r = Temp slash cmd to give old cache entries an avg itemlevel";
-ex.slashFuncs.fixcacheitemlevels = function(cmd)
-	local numItems = (#ExScanner.Slots - 3); -- Ignore Tabard + Shirt + Ranged, hence minus 3
-	for entryName, entry in next, cache do
-		local iLvlTotal = 0;
-		for slotName, link in next, entry.Items do
-			if (slotName ~= "TabardSlot") and (slotName ~= "ShirtSlot") and (slotName ~= "RangedSlot") then
-				local _, _, _, itemLevel = GetItemInfo(link);
-				if (itemLevel) then
-					if (slotName == "MainHandSlot") and (not entry.Items.SecondaryHandSlot) then
-						itemLevel = (itemLevel * 2);
-					end
-					iLvlTotal = (iLvlTotal + itemLevel);
-				end
-			end
-		end
-		entry.iLvlAvg = nil
-		entry.iLvlAverage = (iLvlTotal / numItems);
-	end
-end
 
 --------------------------------------------------------------------------------------------------------
 --                                           Module Scripts                                           --
@@ -192,60 +170,32 @@ local function GetGemAndItemInfo()
 	local iLvlTotal, iSlotValues, iLvlMin, iLvlMax = 0, 0;
 	local gemCount, gemRed, gemYellow, gemBlue = 0, 0, 0, 0;
 	for slotName, link in next, ex.info.Items do
-		-- Count Gem Colors
-		for i = 1, 3 do
-			local _, gemLink = GetItemGem(link,i);
-			if (gemLink) then
-				gemCount = (gemCount + 1);
-				local _, _, _, _, _, _, itemSubType = GetItemInfo(gemLink);
-				if (EMPTY_SOCKET_NO_COLOR:match(itemSubType)) then
-					gemRed = (gemRed + 1);
-					gemYellow = (gemYellow + 1);
-					gemBlue = (gemBlue + 1);
-				else
-					ExScannerTip:ClearLines();
-					ExScannerTip:SetHyperlink(gemLink);
-					-- 09.08.09: This code now scans all lines, to fix the issue with patch 3.2 adding more lines to item tooltip.
-					for n = 3, ExScannerTip:NumLines() do
-						local line = _G["ExScannerTipTextLeft"..n]:GetText():lower();
-						if (line:match("^\".+\"$")) then
-							if (line:match(RED_GEM:lower())) then
-								gemRed = (gemRed + 1);
-							end
-							if (line:match(YELLOW_GEM:lower())) then
-								gemYellow = (gemYellow + 1);
-							end
-							if (line:match(BLUE_GEM:lower())) then
-								gemBlue = (gemBlue + 1);
-							end
-						end
-					end
-				end
-			end
-		end
 		-- Calculate Item Level Numbers
-		if (slotName ~= "TabardSlot") and (slotName ~= "ShirtSlot") and (slotName ~= "RangedSlot") then
+		if (slotName ~= "TabardSlot") and (slotName ~= "ShirtSlot") then
 			local _, _, itemRarity, itemLevel = GetItemInfo(link);
+			itemLevel = GetDetailedItemLevelInfo(link);
 			if (itemLevel) then
 				iLvlMin = min(iLvlMin or itemLevel,itemLevel);
 				iLvlMax = max(iLvlMax or itemLevel,itemLevel);
-				local itemSlotValue = ExScanner:CalculateItemSlotValue(link);
+				-- Az: Since heirlooms scale, we should at least not count them as a level 1 item, that wouldn't be fair
+				-- if (itemRarity == 7) and (itemLevel == 1) then
+					-- itemLevel = ex.info.level;
+				-- end
 				if (slotName == "MainHandSlot") and (not ex.info.Items.SecondaryHandSlot) then
 					itemLevel = (itemLevel * 2);
-					itemSlotValue = (itemSlotValue * 2);
 				end
 				iLvlTotal = (iLvlTotal + itemLevel);
-				iSlotValues = (iSlotValues + itemSlotValue);
 			end
 		end
 	end
-	-- Return
-	return iLvlTotal, iLvlMin, iLvlMax, iSlotValues, gemCount, gemRed, gemYellow, gemBlue;
+	-- Return	
+	return iLvlTotal, iLvlMin, iLvlMax;
 end
 
 -- Initialise Details
 function mod:InitDetails()
 	local details = self.details;
+	details:Clear();
 	-- Unit Details
 	if (ex.unit) then
 		details:Add("Unit");
@@ -256,21 +206,19 @@ function mod:InitDetails()
 		end
 	end
 	-- Item Level
-	local iLvlTotal, iLvlMin, iLvlMax, iSlotValues, gemCount, gemRed, gemYellow, gemBlue = GetGemAndItemInfo();
-	local numItems = (#ExScanner.Slots - 3); -- Ignore Tabard + Shirt + Ranged, hence minus 3
+	local iLvlTotal, iLvlMin, iLvlMax = GetGemAndItemInfo();
+	local numItems = (#LibGearExam.Slots - 2); -- Ignore Tabard + Shirt, hence minus 2
 	details:Add("Item Levels");
-	details:Add("Combined Item Slot Values",floor(iSlotValues));
-	details:Add("Average Item Slot Value",format("%.2f",iSlotValues / numItems));
 	details:Add("Combined Item Levels",iLvlTotal);
 	details:Add("Average Item Level",format("%.2f",iLvlTotal / numItems));
 	if (iLvlMin and iLvlMax) then
 		details:Add("Min / Max Item Levels",iLvlMin.." / "..iLvlMax);
 	end
-	ex.info.iLvlAverage = (iLvlTotal / numItems);
+	ex.info.iLvlAverage = math.floor((iLvlTotal / numItems)*10)*0.1;
 	-- Gems
-	details:Add("Gems");
-	details:Add("Number of Gems",gemCount);
-	details:Add("Gem Color Matches",format("|cffff6060%d|r/|cffffff00%d|r/|cff008ef8%d",gemRed,gemYellow,gemBlue));
+	-- details:Add("Gems");
+	-- details:Add("Number of Gems",gemCount);
+	-- details:Add("Gem Color Matches",format("|cffff6060%d|r/|cffffff00%d|r/|cff008ef8%d",gemRed,gemYellow,gemBlue));
 	-- Cache
 	if (ex.isCacheEntry) then
 		details:Add("Cached Entry");
