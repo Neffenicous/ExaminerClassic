@@ -92,7 +92,7 @@ LGE.StatNames = {
 	SPELLHASTE = "Spell Haste Rating",
 	SPELLPENETRATION = "Spell Penetration",
 
-	HEAL = "Healing",
+	-- HEAL = "Healing",
 	SPELLDMG = "Spell Power",
 	ARCANEDMG = "Spell Power (Arcane)",
 	FIREDMG = "Spell Power (Fire)",
@@ -402,9 +402,9 @@ function LGE:GetStatValue(statToken,statTable,compareTable,level,combineAdditive
 		if (statToken == "SPELLDMG") and (statTable["INT"]) then
 		--	value = (value + statTable["INT"]);	Intellect does not give spellpower in classic.
 		end
-		if (statToken == "HEAL") and (statTable["SPELLDMG"]) then
-			value = (value + statTable["SPELLDMG"]);	-- spelldmg is also healing power though. tested on mage and paladin
-		end
+		-- if (statToken == "HEAL") and (statTable["SPELLDMG"]) then
+		-- 	value = (value + statTable["SPELLDMG"]);	-- spelldmg is also healing power though. tested on mage and paladin
+		-- end
 		if (statToken == "RAP") and (statTable["AP"]) then
 			value = (value + statTable["AP"]);
 		end
@@ -441,7 +441,7 @@ function LGE:GetStatValue(statToken,statTable,compareTable,level,combineAdditive
 		 -- do we color it ? "%" looks out of place...
 		if (self.StatRatingBaseTable[statToken]) then
 			local color = "|cff80ff80";
-			value = color..value.."%";
+			value = color..value;
 		end	
 		return value, valuePct;
 	end

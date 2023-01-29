@@ -755,11 +755,11 @@ function ex:DoInspect(unit,openFlag)
 			self.modules[cfg.activePage].page:Hide();	-- Az: this is slightly bad to do, what if a module still have data to show? feats still work outside inspect range for example
 		end
 		-- show talents
-		if (openFlag ~= false) and _G.Details and (UnitIsPlayer("target")) and (not self:IsShown()) then
-    		self:Display();
-    		InspectFrame = Examiner
-    		Details:ShowTalentsPanel()
-		end
+		-- if (openFlag ~= false) and _G.Details and (UnitIsPlayer("target")) and (not self:IsShown()) then
+    	-- 	self:Display();
+    	-- 	InspectFrame = Examiner
+    	-- 	Details:ShowTalentsPanel()
+		-- end
 		-- Outside range, monitor range and inspect as soon as they are in range
 		if (not CheckInteractDistance(unit,3)) then
 			self:SetScript("OnUpdate",Examiner_OnUpdate);

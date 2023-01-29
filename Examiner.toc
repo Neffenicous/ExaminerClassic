@@ -24,7 +24,7 @@ Modules\config.lua
 Modules\cache.lua
 Modules\stats.lua
 Modules\pvp.lua
-Modules\talents.lua
+## Modules\talents.lua
 Modules\gearlist.lua
 Modules\delayedscan.lua
 Modules\itemusage.lua
