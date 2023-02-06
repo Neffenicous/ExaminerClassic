@@ -179,20 +179,20 @@ function ex:VARIABLES_LOADED(event)
 end
 
 -- Target Unit Changed
--- function ex:PLAYER_TARGET_CHANGED(event)
--- 	if (cfg.autoInspect) and (UnitExists("target")) then
--- 		self:DoInspect("target");
--- 			if _G.Details and (UnitIsPlayer("target")) then
--- 				InspectFrame = Examiner
--- 				Details:ShowTalentsPanel()
--- 			elseif _G.Details then
--- 				DetailsTalentFrame:Hide();
--- 			end
--- 	elseif (self.unit == "target") then
--- 		self.unit = nil;
--- 		self:SetScript("OnUpdate",nil);
--- 	end
--- end
+function ex:PLAYER_TARGET_CHANGED(event)
+	if (cfg.autoInspect) and (UnitExists("target")) then
+		self:DoInspect("target");
+			if _G.Details and (UnitIsPlayer("target")) then
+				InspectFrame = Examiner
+				-- Details:ShowTalentsPanel()
+			elseif _G.Details then
+				DetailsTalentFrame:Hide();
+			end
+	elseif (self.unit == "target") then
+		self.unit = nil;
+		self:SetScript("OnUpdate",nil);
+	end
+end
 
 -- Mouseover Unit Changed
 function ex:UPDATE_MOUSEOVER_UNIT(event)
