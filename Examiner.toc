@@ -1,7 +1,7 @@
-## Interface: 30001
-## Version: Classic Fan Update (3.00.1)
+## Interface: 40000
+## Version: Classic SoD Fan Update (4.00.0)
 ## Title: Examiner
-## Author: Aezay (Earthen Ring EU), Grome (Sulfuron), Sillindra (Angerforge)
+## Author: Aezay (Earthen Ring EU), Grome (Sulfuron), Sillindra (Angerforge), Ainolar (Wildgrowth - SOD)
 ## Notes: Advanced Inspection Mod of Gear and Honor.
 ## SavedVariables: Examiner_Config, Examiner_Cache
 ## OptionalDeps: Details

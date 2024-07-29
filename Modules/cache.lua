@@ -35,11 +35,16 @@ local RACE_COORD = {
 	Gnome		= { left = 2/8, right = 3/8, top = 0/4, bottom = 1/4 },
 	NightElf	= { left = 3/8, right = 4/8, top = 0/4, bottom = 1/4 },
 	Draenei		= { left = 4/8, right = 5/8, top = 0/4, bottom = 1/4 },
+	Worgen		= { left = 5/8, right = 6/8, top = 0/4, bottom = 1/4 },
+
 	Tauren		= { left = 0/8, right = 1/8, top = 1/4, bottom = 2/4 },
 	Scourge		= { left = 1/8, right = 2/8, top = 1/4, bottom = 2/4 },
 	Troll		= { left = 2/8, right = 3/8, top = 1/4, bottom = 2/4 },
 	Orc			= { left = 3/8, right = 4/8, top = 1/4, bottom = 2/4 },
 	BloodElf	= { left = 4/8, right = 5/8, top = 1/4, bottom = 2/4 },
+	Goblin		= { left = 5/8, right = 6/8, top = 1/4, bottom = 2/4 },
+
+	Pandaren	= { left = 6/8, right = 7/8, top = 0/4, bottom = 1/4 },	-- This uses the alliance images; the horde ones are just mirrored.
 };
 
 -- Dialog Func

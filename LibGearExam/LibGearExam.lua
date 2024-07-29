@@ -52,60 +52,58 @@ end
 
 -- Stat Names
 LGE.StatNames = {
-	STR = "Strength",
-	AGI = "Agility",
-	STA = "Stamina",
-	INT = "Intellect",
-	SPI = "Spirit",
+	-- Base Stats
+	STR = ITEM_MOD_STRENGTH_SHORT,
+	AGI = ITEM_MOD_AGILITY_SHORT,
+	STA = ITEM_MOD_STAMINA_SHORT,
+	INT = ITEM_MOD_INTELLECT_SHORT,
+	SPI = ITEM_MOD_SPIRIT_SHORT,
+	HP = HEALTH.." Points",
+	MP = MANA.." Points",
+	HP5 = ITEM_MOD_HEALTH_REGEN_SHORT,
+	MP5 = ITEM_MOD_POWER_REGEN0_SHORT,
 
-	ARMOR = "Armor",
+	-- Defensive Stats
+	ARMOR = ARMOR,
+	DODGE = DODGE_CHANCE,
+	PARRY = PARRY_CHANCE,
+	DEFENSE = DEFENSE,
+	BLOCK = BLOCK_CHANCE,
+	BLOCKVALUE = ITEM_MOD_BLOCK_VALUE_SHORT,
+	
+	-- Resistances
+	ARCANERESIST = RESISTANCE6_NAME,
+	FIRERESIST = RESISTANCE2_NAME,
+	NATURERESIST = RESISTANCE3_NAME,
+	FROSTRESIST = RESISTANCE4_NAME,
+	SHADOWRESIST = RESISTANCE5_NAME,
 
-	ARCANERESIST = "Arcane Resistance",
-	FIRERESIST = "Fire Resistance",
-	NATURERESIST = "Nature Resistance",
-	FROSTRESIST = "Frost Resistance",
-	SHADOWRESIST = "Shadow Resistance",
+	-- Offensive Stats
+	AP = STAT_ATTACK_POWER,
+	RAP = ITEM_MOD_RANGED_ATTACK_POWER_SHORT,
+	APFERAL = ITEM_MOD_FERAL_ATTACK_POWER_SHORT,
+	CRIT = CRIT_CHANCE,
+	HIT = STAT_HIT_CHANCE,
+	RANGEDHIT = ITEM_MOD_HIT_RANGED_RATING_SHORT,	-- why doesn't this work? added to overall hit as workaround for hunters
+	HASTE = MELEE.." "..STAT_HASTE,
+	WPNDMG = DAMAGE_TOOLTIP,
+	RANGEDDMG = RANGED_DAMAGE_TOOLTIP,
+	--ARMORPENETRATION = ITEM_MOD_ARMOR_PENETRATION_RATING_SHORT,	-- Az: Obsolete
+	--EXPERTISE = STAT_EXPERTISE,	-- not in classic
 
-	DODGE = "Dodge Rating",
-	PARRY = "Parry Rating",
-	DEFENSE = "Defense Rating",
-	BLOCK = "Block Rating",
-	BLOCKVALUE = "Block Value",
-	RESILIENCE = "Resilience Rating",
-
-	AP = "Attack Power",
-	RAP = "Ranged Attack Power",
-	CRIT = "Crit Rating",
---HIT = "Hit Rating (Physical)",
---HASTE = "Haste Rating (Physical)",
-	HIT = "Physical Hit Rating",
-	HASTE = "Physical Haste Rating",
-	WPNDMG = "Weapon Damage",
-	RANGEDDMG = "Ranged Damage",
-	ARMORPENETRATION = "Armor Penetration Rating",
-	EXPERTISE = "Expertise Rating",
-
-	SPELLCRIT = "Spell Crit Rating",
---SPELLHIT = "Hit Rating (Spell)",
---SPELLHASTE = "Haste Rating (Spell)",
-	SPELLHIT = "Spell Hit Rating",
-	SPELLHASTE = "Spell Haste Rating",
-	SPELLPENETRATION = "Spell Penetration",
-
-	-- HEAL = "Healing",
-	SPELLDMG = "Spell Power",
-	ARCANEDMG = "Spell Power (Arcane)",
-	FIREDMG = "Spell Power (Fire)",
-	NATUREDMG = "Spell Power (Nature)",
-	FROSTDMG = "Spell Power (Frost)",
-	SHADOWDMG = "Spell Power (Shadow)",
-	HOLYDMG = "Spell Power (Holy)",
-
-	HP = "Health Points",
-	MP = "Mana Points",
-
-	HP5 = "Health Regen Per 5 Sec",
-	MP5 = "Mana Regen Per 5 Sec",
+	-- Spells
+	SPELLCRIT = STAT_CATEGORY_SPELL.." "..CRIT_ABBR,
+	SPELLHIT = STAT_CATEGORY_SPELL.." "..HIT,
+	SPELLHASTE = STAT_CATEGORY_SPELL.." "..STAT_HASTE,
+	SPELLPENETRATION = ITEM_MOD_SPELL_PENETRATION_SHORT,
+	SPELLDMG = ITEM_MOD_SPELL_POWER_SHORT,
+	HEAL = ITEM_MOD_SPELL_HEALING_DONE_SHORT,
+	ARCANEDMG = ITEM_MOD_SPELL_POWER_SHORT.." ("..STRING_SCHOOL_ARCANE..")",
+	FIREDMG = ITEM_MOD_SPELL_POWER_SHORT.." ("..STRING_SCHOOL_FIRE..")",
+	NATUREDMG = ITEM_MOD_SPELL_POWER_SHORT.." ("..STRING_SCHOOL_NATURE..")",
+	FROSTDMG = ITEM_MOD_SPELL_POWER_SHORT.." ("..STRING_SCHOOL_FROST..")",
+	SHADOWDMG = ITEM_MOD_SPELL_POWER_SHORT.." ("..STRING_SCHOOL_SHADOW..")",
+	HOLYDMG = ITEM_MOD_SPELL_POWER_SHORT.." ("..STRING_SCHOOL_HOLY..")",
 	
 	-- Skill Bonuses
 	DAGGERSKILL = "Daggers Skill Bonus",
@@ -132,7 +130,7 @@ sort(statsSorted,function(a,b) return stats[a] < stats[b]; end);
 -- Absolute Stats, ie. they don't scale in percentages
 LGE.ABSOLUTE_STATS = {
 	MASTERY = true,
-	EXPERTISE = false,
+	EXPERTISE = true,
 };
 
 -- Scanner Tooltip
@@ -173,18 +171,25 @@ local EMPTY_SOCKET_NAMES = {
 
 LGE.StatRatingBaseTable = {
 	SPELLHASTE = 10,
-	SPELLHIT = 8,
-	SPELLCRIT = 14,
+	SPELLHIT = 1, 
+	SPELLCRIT = 1,
 	HASTE = 10,
-	HIT = 10,
-	CRIT = 14,
-	EXPERTISE = 10.369018,
-	DEFENSE = 1.5,
-	DODGE = 13.8,	-- Patch 3.2: Increased 15% from 12
-	PARRY = 13.8,	-- Patch 3.2: Reduced 8% from 15
-	BLOCK = 5,
-	RESILIENCE = 28.75,	-- Patch 3.2: Increased 15% from 25
-	ARMORPENETRATION = 4.69512176513672 / 1.25 * 1.12
+	HIT = 1,				-- Buffed a little in 4.0.1 (was 10 before)
+	CRIT = 1,
+	EXPERTISE = 2.34483,		-- Buffed a little in 4.0.1 (was 2.5 before)
+	DODGE = 1,
+	PARRY = 1,
+	BLOCK = 1,				-- Nerfed a little in 4.0.1 (was 5 before)
+	MASTERY = 14,
+
+	-- Az: resilience is a mess, how do they get to the current value as of patch 4.0.3a? It seems to be 9.58333333333333333 which is 28.75 / 3. How are they getting to this though?
+--	RESILIENCE = 28.75 * 0.75 / 2.25,	-- Reduced 25% compared to wrath, then buffed by 100% as a "hotfix". 10.12.05: found out this didnt match the char sheet, and it must have been changed again
+--	RESILIENCE = 28.75 * 0.75 / 2.9,	-- This seems to be correct at 85, somehow I think resilience scales differently now depending on level
+--	RESILIENCE = 28.75 * 0.75 / 2 / 1.125,
+	RESILIENCE = 7.96418,				-- Apparently, this is the value for 4.1?
+
+	-- DEFENSE = 1.5,
+	ARMORPENETRATION = 4.69512176513672 / 1.25 / .88,
 };
 
 --------------------------------------------------------------------------------------------------------
@@ -330,16 +335,30 @@ end
 --                                 Checks a Single Line for Patterns                                  --
 --------------------------------------------------------------------------------------------------------
 function LGE:ScanLineForPatterns(text,statTable)
-	for _, pattern in ipairs(self.Patterns) do
-		local pos, _, value1, value2 = text:find(pattern.p);
+	for index, pattern in ipairs(self.Patterns) do
+		local pos, _, value1, value2, value3 = text:find(pattern.p);
 		if (pos) and (value1 or pattern.v) then
+--pattern.uses = (pattern.uses or 0) + 1;
+			-- Pattern Debugging -> Find obsolete patterns put on alert
+			if (pattern.alert) and (Examiner) then
+				local _, link = self.Tip:GetItem();
+				link = link:match(self.ITEMLINK_PATTERN);
+				AzMsg("|2Examiner Scan Alert:|r Please report the following to author.");
+				AzMsg(format("index = |1%d|r, unit = |1%s|r.",index,tostring(Examiner.info.name)));
+				AzMsg(format("text = |1%s|r",text));
+				AzMsg(format("pattern = |1%s|r",pattern.p));
+				AzMsg(format("link = |1%s|r",tostring(link)));
+			end
+			-- Add to stat
 			if (type(pattern.s) == "string") then
 				statTable[pattern.s] = (statTable[pattern.s] or 0) + (value1 or pattern.v);
 			elseif (type(pattern.s) == "table") then
 				for statIndex, statName in ipairs(pattern.s) do
 					if (type(pattern.v) == "table") then
 						statTable[statName] = (statTable[statName] or 0) + (pattern.v[statIndex]);
-					-- Az: This is a bit messy, only supports 2 now, needs to make it dynamic and support as many extra values as possible
+					-- Az: This is a bit messy, only supports 2 now, needs to make it dynamic and support as many extra values as needed
+					elseif (statIndex == 3) and (value3) then
+						statTable[statName] = (statTable[statName] or 0) + (value3);
 					elseif (statIndex == 2) and (value2) then
 						statTable[statName] = (statTable[statName] or 0) + (value2);
 					else
@@ -355,24 +374,40 @@ end
 --------------------------------------------------------------------------------------------------------
 
 -- More to read here: http://www.wowwiki.com/Combat_Rating_System
-function LGE:GetRatingInPercent(stat,rating,level,class)
+function LGE:GetRatingInPercent(stat,rating,level)
 	local base = self.StatRatingBaseTable[stat];
 	-- Check Valid Input
 	if (not base or not rating or not level) then
 		return;
 	end
+	-- Set level to max in case it's unknown; still incorrect, but better
+	if (level == -1) then
+		level = MAX_PLAYER_LEVEL;
+	end
 	-- Patch 3.1 Quote: "shamans, paladins, druids, and death knights now receive 30% more melee haste from Haste Rating."
-	if (class and stat == "HASTE") and (class == "PALADIN" or class == "SHAMAN" or class == "DEATHKNIGHT" or class == "DRUID") then
-		base = (base / 1.3);
-	end
-	-- Calc Depending on Level
-	if (level >= 70) then
-		return rating / base / (82 / 52 * (131 / 63) ^ ((level - 70) / 10));
+	-- Az: This has been disabled for cataclysm. Haven't read anything official about it being removed, but it appears to be. Tested on paladins and shamans. DKs and druids still untested.
+--	if (class and stat == "HASTE") and (class == "PALADIN" or class == "SHAMAN" or class == "DEATHKNIGHT" or class == "DRUID") then
+--		base = (base / 1.3);
+--	end
+	-- Calculate "scale" Depending on Level
+	local scale;
+	if (level > 85) then
+		scale = (82 / 52 * (131 / 63) * 3.9053695 ^ ((level - 80) / 5));	-- Az: No idea what the MoP formula is, so just using the Cata one for now :/
+	elseif (level > 80) then
+		scale = (82 / 52 * (131 / 63) * 3.9053695 ^ ((level - 80) / 5));	-- Az: not exactly the correct Cata formula for 80-85!
+	elseif (level >= 70) then
+		scale = (82 / 52 * (131 / 63) ^ ((level - 70) / 10));
 	elseif (level >= 60) then
-		return rating / base / (82 / (262 - 3 * level));
+		scale = (82 / (262 - 3 * level));
+	elseif (level <= 33) and (stat == "DODGE" or stat == "PARRY" or stat == "BLOCK" or stat == "RESILIENCE") then
+		scale = 0.5;
+	elseif (level > 10) then
+		scale = ((level - 8) / 52);
 	else
-		return rating / base / ((level > 10 and level - 8 or 2) / 52);
+		scale = (2 / 52);
 	end
+	-- Return Calculated Percentage
+	return (rating / base / scale);
 end
 
 --------------------------------------------------------------------------------------------------------
@@ -402,9 +437,9 @@ function LGE:GetStatValue(statToken,statTable,compareTable,level,combineAdditive
 		if (statToken == "SPELLDMG") and (statTable["INT"]) then
 		--	value = (value + statTable["INT"]);	Intellect does not give spellpower in classic.
 		end
-		-- if (statToken == "HEAL") and (statTable["SPELLDMG"]) then
-		-- 	value = (value + statTable["SPELLDMG"]);	-- spelldmg is also healing power though. tested on mage and paladin
-		-- end
+		if (statToken == "HEAL") and (statTable["SPELLDMG"]) then
+			value = (value + statTable["SPELLDMG"]);	-- spelldmg is also healing power though. tested on mage and paladin
+		end
 		if (statToken == "RAP") and (statTable["AP"]) then
 			value = (value + statTable["AP"]);
 		end
@@ -412,7 +447,7 @@ function LGE:GetStatValue(statToken,statTable,compareTable,level,combineAdditive
 	-- OPTION: Give Rating Values in Percent
 	local valuePct, rating;
 	if (self.StatRatingBaseTable[statToken]) then
-		rating = self:GetRatingInPercent(statToken,value,level,class) or 0; -- tip ?
+		rating = self:GetRatingInPercent(statToken,value,level) or 0; -- tip ?
 		valuePct = tonumber(format("%.2f",rating)); -- tip ?
 	end
 	-- Do not modify the value further if we are just getting the compare value (compareTable == true)
@@ -441,7 +476,7 @@ function LGE:GetStatValue(statToken,statTable,compareTable,level,combineAdditive
 		 -- do we color it ? "%" looks out of place...
 		if (self.StatRatingBaseTable[statToken]) then
 			local color = "|cff80ff80";
-			value = color..value;
+			value = color..value.."%";
 		end	
 		return value, valuePct;
 	end

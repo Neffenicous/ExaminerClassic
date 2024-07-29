@@ -6,12 +6,12 @@
 
 LibGearExam.Patterns = {
 	--  Base Stats  --
-	{ p = "([+-]%d+) Strength", s = "STR" },
-	{ p = "([+-]%d+) Agility", s = "AGI" },
-	{ p = "([+-]%d+) Stamina", s = "STA" },
-	{ p = "([+-]%d+) Intellect", s = "INT" },
-	{ p = "([+-]%d+) Spirit", s = "SPI" },
-	{ p = "(%d+) Armor", s = "ARMOR" }, -- Should catch all armor: Base armor, Armor enchants, Armor kits
+	{ p = "%+(%d+) Strength", s = "STR" },
+	{ p = "%+(%d+) Agility", s = "AGI" },
+	{ p = "%+(%d+) Stamina", s = "STA" },
+	{ p = "%+(%d+) Intellect", s = "INT" },
+	{ p = "%+(%d+) Spirit", s = "SPI" },
+	{ p = "+?(%d+) Armor", s = "ARMOR" },
 
 	--  Resistances (Exclude the Resist-"ance" then it picks up armor patches as well)  --
 	{ p = "%+(%d+) Arcane Resist", s = "ARCANERESIST" },
@@ -19,82 +19,79 @@ LibGearExam.Patterns = {
 	{ p = "%+(%d+) Nature Resist", s = "NATURERESIST" },
 	{ p = "%+(%d+) Frost Resist", s = "FROSTRESIST" },
 	{ p = "%+(%d+) Shadow Resist", s = "SHADOWRESIST" },
-	{ p = "%+(%d+) All Resistances", s = { "ARCANERESIST", "FIRERESIST", "NATURERESIST", "FROSTRESIST", "SHADOWRESIST" } },
-	{ p = "%+(%d+) Resist All", s = { "ARCANERESIST", "FIRERESIST", "NATURERESIST", "FROSTRESIST", "SHADOWRESIST" } }, -- Void Sphere
+	{ p = "%+(%d+) t?o? ?All Resistances", s = { "ARCANERESIST", "FIRERESIST", "NATURERESIST", "FROSTRESIST", "SHADOWRESIST" } },
 
-	--  Equip: Other  --
-	{ p = "Improves your resilience rating by (%d+)%.", s = "RESILIENCE" },
-
-	{ p = "Increases defense rating by (%d+)%.", s = "DEFENSE" },
-	{ p = "Increases your dodge rating by (%d+)%.", s = "DODGE" },
-	{ p = "Increases your parry rating by (%d+)%.", s = "PARRY" },
-	{ p = "Increases your s?h?i?e?l?d? ?block rating by (%d+)%.", s = "BLOCK" }, -- Should catch both new and old style
-
+	--  Equip: Defense  --
+	{ p = "Increased Defense %+(%d+)%.", s = "DEFENSE" },
+	{ p = "Increases your chance to dodge an attack by (%d+)%%%.", s = "DODGE" },
+	-- this should detect rings of eluding (1% dodge and random agi)  but doesnt:
+	{ p = "^(%d+)%% Dodge", s = "DODGE" },
+	{ p = "Increases your chance to block attacks with a shield by (%d+)%%%.", s = "BLOCK" },
+	{ p = "Increases your chance to parry an attack by (%d+)%%%.", s = "PARRY" },
 	{ p = "Increases the block value of your shield by (%d+)%.", s = "BLOCKVALUE" },
-	{ p = "^(%d+) Block$", s = "BLOCKVALUE" }, -- Should catch only base block value from a shield
+	{ p = "^(%d+) Block$", s = "BLOCKVALUE" },
 
-	--  Equip: Melee & Ranged  --
-	{ p = "Increases attack power by (%d+)%.", s = "AP" },
-	{ p = "Increases ranged attack power by (%d+)%.", s = "RAP" },
+	--  Equip: Melee & Ranged & Magic  --
+	{ p = "Improves your chance to get a critical strike by (%d+)%%%.", s = { "CRIT" }},
+	{ p = "Improves your chance to hit by (%d+)%%%.", s = { "HIT" }},
+	-- 3% hit scope only applies to ranged hit:
+	{ p = "%+(%d+)%% Hit", s = { "HIT" }},
+	-- just going to add it to overall hit because i cant get RANGEDHIT to work
+	{ p = "Improves your chance to get a critical strike with spells by (%d+)%%%.", s = { "SPELLCRIT" }},
+	{ p = "Improves your chance to get a critical strike with all spells and attacks by (%d+)%%%.", s = { "SPELLCRIT" }},
+	{ p = "Improves your chance to hit with spells by (%d+)%%%.", s = { "SPELLHIT" }},
+	{ p = "Improves your chance to hit with all spells and attacks by (%d+)%%%.", s = { "SPELLHIT" }},
+	-- Skill Bonuses
+	{ p = "Increased Daggers %+(%d+)%.", s = { "DAGGERSKILL" }},
+	{ p = "Increased Axes %+(%d+)%.", s = { "ONEAXESKILL" }},
+	{ p = "Increased Two%-handed Axes %+(%d+)%.", s = { "TWOAXESKILL" }},
+	{ p = "Increased Swords %+(%d+)%.", s = { "ONESWORDSKILL" }},
+	{ p = "Increased Two%-handed Swords %+(%d+)%.", s = { "TWOSWORDSKILL" }},	
+	{ p = "Increased Maces %+(%d+)%.", s = { "ONEMACESKILL" }},
+	{ p = "Increased Two%-handed Maces %+(%d+)%.", s = { "TWOMACESKILL" }},
+	{ p = "Increased Bows %+(%d+)%.", s = { "BOWSKILL" }},
+	{ p = "Increased Guns %+(%d+)%.", s = { "GUNSSKILL" }},
+	{ p = "Increased Crossbows %+(%d+)%.", s = { "CROSSBOWSKILL" }},
 
-	{ p = "Increases your expertise rating by (%d+)%.", s = "EXPERTISE" }, -- New 2.3 Stat
-	{ p = "Increases y?o?u?r? ?armor penetration rating by (%d+)%.", s = "ARMORPENETRATION" }, -- Armor Penetration in 3.0
+    --  Equip: Melee & Ranged
+	{ p = "%+(%d+) Attack Power%.", s = "AP" },
+	{ p = "%+(%d+) Attack Power in Cat, Bear, and Dire Bear forms only%.", s = "APFERAL" },
+	{ p = "Attack Speed %+(%d+)%%", s = "HASTE" },
+	{ p = "%+(%d+) ranged Attack Power%.", s = "RAP" },
 
-	--  Equip: Spell Power  --
-	{ p = "Increases your spell penetration by (%d+)%.", s = "SPELLPENETRATION" },
-
-	{ p = "Increases spell power by (%d+)%.", s = { "HEAL", "SPELLDMG" } },
-	{ p = "Increases spell power slightly%.", s = { "HEAL", "SPELLDMG" }, v = 6 }, -- Bronze Band of Force
-
-	{ p = "%+(%d+) Shadow and Frost Spell Power", s = { "SHADOWDMG", "FROSTDMG" } },	-- Old "Soulfrost" enchant
-	{ p = "%+(%d+) Arcane and Fire Spell Power", s = { "ARCANEDMG", "FIREDMG" } },	-- Old "Sunfire" enchant
-
-	{ p = "Increases arcane spell power by (%d+)%.", s = "ARCANEDMG" },
-	{ p = "Increases fire spell power by (%d+)%.", s = "FIREDMG" },
-	{ p = "Increases nature spell power by (%d+)%.", s = "NATUREDMG" },
-	{ p = "Increases frost spell power by (%d+)%.", s = "FROSTDMG" },
-	{ p = "Increases shadow spell power by (%d+)%.", s = "SHADOWDMG" },
-	{ p = "Increases holy spell power by (%d+)%.", s = "HOLYDMG" },
-
-	--  Equip: Stats Which Improves Both Spells & Melee  --
-	{ p = "Increases your critical strike rating by (%d+)%.", s = { "CRIT", "SPELLCRIT" } },
-	{ p = "Improves critical strike rating by (%d+)%.", s = { "CRIT", "SPELLCRIT" } },
-	{ p = "Increases your hit rating by (%d+)%.", s = { "HIT", "SPELLHIT" } },
-	{ p = "Improves hit rating by (%d+)%.", s = { "HIT", "SPELLHIT" } },
-	{ p = "Improves haste rating by (%d+)%.", s = { "HASTE", "SPELLHASTE" } },
+	--  Equip: Magic --
+	{ p = "Increases damage and healing done by magical spells and effects by up to (%d+)%.", s = { "SPELLDMG" } },
+	{ p = "Increases healing done by spells and effects by up to (%d+)%.", s = { "HEAL" } },
+	{ p = "%+(%d+) Healing Spells", s = { "HEAL" } },
+	{ p = "Increases damage done by Arcane spells and effects by up to (%d+)%.", s = "ARCANEDMG" },
+	{ p = "Increases damage done by Fire spells and effects by up to (%d+)%.", s = "FIREDMG" },
+	{ p = "Increases damage done by Nature spells and effects by up to (%d+)%.", s = "NATUREDMG" },
+	{ p = "Increases damage done by Frost spells and effects by up to (%d+)%.", s = "FROSTDMG" },
+	{ p = "Increases damage done by Shadow spells and effects by up to (%d+)%.", s = "SHADOWDMG" },
+	{ p = "Increases damage done by Holy spells and effects by up to (%d+)%.", s = "HOLYDMG" },
 
 	--  Health & Mana Per 5 Sec  --
+	{ p = "Restores (%d+) mana per 5 sec%.", s = "MP5" },
+	{ p = "(%d+) mana every 5 sec%.", s = "MP5" },
+	{ p = "Restores (%d+) health per 5 sec%.", s = "HP5"},
 	{ p = "(%d+) health every 5 sec%.", s = "HP5" },
-	{ p = "(%d+) [Hh]ealth per 5 sec%.", s = "HP5" },
 
-	{ p = "%+(%d+) Mana Regen", s = "MP5" }, -- Scryer Shoulder Enchant, Priest ZG Enchant
-	{ p = "%+(%d+) Mana restored per 5 seconds", s = "MP5" }, -- Magister's Armor Kit
-
-	{ p = "%+(%d+) Health and Mana every 5 sec", s = { "HP5", "MP5" } },	-- Old Vitality enchant changed into this
-
-	{ p = "%+?(%d+) [Mm]ana per 5 [Ss]econds", s = "MP5" }, -- Gem: Royal Shadow Draenite / Wyrmrest head enchant
-	{ p = "Mana Regen (%d+) per 5 sec%.", s = "MP5" }, -- Bracer Enchant
-	{ p = "%+(%d+) Mana/5 seconds", s = "MP5" }, -- Some WotLK Shoulder Enchant, unsure which
-
-	{ p = "(%d+) [Mm]ana [Pp]er 5 [Ss]ec%.|-r-$", s = "MP5" }, -- Combined Pattern: Covers [Equip Bonuses] [Socket Bonuses] --- Added "|-r-$" to avoid confusing on item 33502
-	{ p = "(%d+) [Mm]ana every 5 [Ss]ec", s = "MP5" }, -- Combined Pattern: Covers [Chest Enchant] [Gem: Dazzling Deep Peridot] [Various Gems] -- Az: 09.01.05 removed the "%+" at the start.
-
-	--  Enchants / Gems / Socket Bonuses / Mixed / Misc  --
-	{ p = "^%+(%d+) HP$", s = "HP" },
-	{ p = "^%+(%d+) Health$", s = "HP" },
-	{ p = "^%+(%d+) Mana$", s = "MP" },
-
-	{ p = "^%+(%d+) Shadow and Frost Spell Power", s = { "FROSTDMG", "SHADOWDMG" } },	-- Soulfrost enchant
-	{ p = "^%+(%d+) Arcane and Fire Spell Power", s = { "ARCANEDMG", "FIREDMG" } },		-- Sunfire enchant
-
---	{ p = "^Rune of the Stoneskin Gargoyle$", s = "DEFENSE", v = 25 }, -- Death Knight Enchant, also adds 2% stamina
-
-	-- Az: these 3 was added 09.01.05 and has not been checked out in game yet, please confirm they are correct.
-	{ p = "^Titanium Weapon Chain$", s = { "HIT", "SPELLHIT" }, v = 28 },
-	{ p = "^Titanium Plating$", s = "BLOCKVALUE", v = 40 },
-
-	{ p = "%+(%d+) t?o? ?All Stats", s = { "STR", "AGI", "STA", "INT", "SPI" } }, -- Chest + Bracer Enchant
-
+	--  Enchants / Socket Bonuses / Mixed / Misc  --
+	{ p = "^Agility %+(%d+)$", s = "AGI" },
+	{ p = "^Stamina %+(%d+)$", s = "STA" },
+	{ p = "^Strength %+(%d+)$", s = "STR" },
+	{ p = "^Intellect %+(%d+)$", s = "INT" },
+	{ p = "^Spirit %+(%d+)$", s = "SPI" },
+	{ p = "^Health %+(%d+)$", s = "HP" },
+	{ p = "^HP %+(%d+)$", s = "HP" },
+	{ p = "^Mana %+(%d+)$", s = "MP" },
+	{ p = "^Reinforced Armor %+(%d+)$", s = "ARMOR" },
+	{ p = "^Armor %+(%d+)", s = "ARMOR" },
+	{ p = "^Scope %(%+(%d+) Damage%)$", s = "RANGEDDMG" },
+	{ p = "Weapon Damage %+(%d+)", s = "WPNDMG" },
+	{ p = "^Healing Spells %+(%d+)$", s = "HEAL" },
+	{ p = "^Spell Damage %+(%d+)$", s = "SPELLDMG" },
+	{ p = "All Stats %+(%d+)", s = { "STR", "AGI", "STA", "INT", "SPI" } },
 	{ p = "%+(%d+) Arcane S?p?e?l?l? ?Damage", s = "ARCANEDMG" },
 	{ p = "%+(%d+) Fire S?p?e?l?l? ?Damage", s = "FIREDMG" },
 	{ p = "%+(%d+) Nature S?p?e?l?l? ?Damage", s = "NATUREDMG" },
@@ -102,108 +99,20 @@ LibGearExam.Patterns = {
 	{ p = "%+(%d+) Shadow S?p?e?l?l? ?Damage", s = "SHADOWDMG" },
 	{ p = "%+(%d+) Holy S?p?e?l?l? ?Damage", s = "HOLYDMG" },
 
-	{ p = "%+(%d+) Defense", s = "DEFENSE" }, -- Exclude "Rating" from this pattern due to Paladin ZG Enchant
-	{ p = "%+(%d+) Dodge Rating", s = "DODGE" },
-	{ p = "(%d+) Parry Rating", s = "PARRY" }, -- Az: plus sign no longer needed for a match
-	{ p = "%+(%d+) S?h?i?e?l?d? ?Block Rating", s = "BLOCK" }, -- Combined Pattern: Covers [Shield Enchant] [Socket Bonus]
+	-- ZG Enchants --
+	{ p = "%+(%d+) Spell Damage and Healing", s = { "SPELLDMG" } }, -- ZG Caster Shoulder Enchant
+	{ p = "Healing and Spell Damage %+(%d+)%/Spell Hit %+(%d+)", s = { "SPELLDMG", "SPELLHIT" } }, -- Mage Helm/Legs
+	{ p = "Healing and Spell Damage %+(%d+)%/Stamina %+(%d+)", s = { "SPELLDMG", "STA" } }, -- Warlock Helm/Legs
+	{ p = "Attack Power %+(%d+)%/Dodge %+(%d+)%%", s = { "AP", "DODGE" } }, -- Rogue Helm/Legs
+	{ p = "Mana Regen %+(%d+)%/Stamina %+(%d+)%/Healing Spells %+(%d+)", s = { "MP5", "STA", "HEAL" } }, -- Priest Helm/Legs
+	{ p = "Ranged Attack Power %+(%d+)%/Stamina %+(%d+)%/Hit %+(%d+)", s = { "RAP", "STA", "HIT" } }, -- Hunter Helm/Legs
+	{ p = "Defense %+(%d+)%/Stamina %+(%d+)%/Block Value %+(%d+)", s = { "DEFENSE", "STA", "BLOCKVALUE" } }, -- Warrior Helm/Legs
+	{ p = "Defense %+(%d+)%/Stamina %+(%d+)%/Healing Spells %+(%d+)", s = { "DEFENSE", "STA", "HEAL" } }, -- Paladin Helm/Legs
+	{ p = "Intellect %+(%d+)%/Stamina %+(%d+)%/Healing Spells %+(%d+)", s = { "INT", "STA", "HEAL" } }, -- Druid Helm/Legs
+	{ p = "Healing and Spell Damage %+(%d+)%/Intellect %+(%d+)", s = { "SPELLDMG", "INT" } }, -- Shaman Helm/Legs
 
-	{ p = "%+(%d+) Block Value", s = "BLOCKVALUE" },
-
-	{ p = "%+(%d+) Attack Power", s = "AP" },
-	{ p = "%+(%d+) Ranged Attack Power", s = "RAP" },
-	{ p = "%+(%d+) Hit Rating", s = { "HIT", "SPELLHIT" } },
-	{ p = "%+(%d+) Crit Rating", s = { "CRIT", "SPELLCRIT" } },
-	{ p = "%+(%d+) Critical S?t?r?i?k?e? ?Rating", s = { "CRIT", "SPELLCRIT" } }, -- Matches two versions, with/without "Strike". No "Strike" on "Unstable Citrine"
-	{ p = "(%d+) Critical strike rating%.", s = { "CRIT", "SPELLCRIT" } }, -- Kirin Tor head enchant, no "+" sign, lower case "s" and "r"
-	{ p = "%+(%d+) [Rr]esilience", s = "RESILIENCE" },	-- PvP Set bonus uses "resilience" so match lower case "r" as well.
-	{ p = "%+(%d+) Haste Rating", s = { "HASTE", "SPELLHASTE" } },
-	{ p = "%+(%d+) Expertise Rating", s = "EXPERTISE" },
-	{ p = "%+(%d+) Armor Penetration Rating", s = "ARMORPENETRATION" },
-
-	{ p = "%+(%d+) Spell Power", s = { "SPELLDMG", "HEAL" } }, -- Was used in a few items/gems before WotLK, but is now the permanent spell pattern
-	{ p = "%+(%d+) Spell Hit", s = "SPELLHIT" }, -- Exclude "Rating" from this pattern to catch Mage ZG Enchant
-	{ p = "%+(%d+) Spell Crit Rating", s = "SPELLCRIT" },
-	{ p = "%+(%d+) Spell Critical ", s = "SPELLCRIT" }, -- Matches three versions, with Strike + Rating, with Rating, and without any suffix at all
-	{ p = "%+(%d+) Spell Haste Rating", s = "SPELLHASTE" }, -- Found on gems
-	{ p = "%+(%d+) Spell Penetration", s = "SPELLPENETRATION" },
-
-	{ p = "%+(%d+)  ?Weapon Damage", s = "WPNDMG" }, -- Added optional space as I found a "+1  Weapon Damage" enchant on someone
-	{ p = "^Scope %(%+(%d+) Damage%)$", s = "RANGEDDMG" },
-
-	-- Demon's Blood
-	{ p = "Increases defense rating by 5, Shadow resistance by 10 and your normal health regeneration by 3%.", s = { "DEFENSE", "SHADOWRESIST", "HP5" }, v = { 5, 10, 3 } },
-
-	-- Void Star Talisman (Warlock T5 Class Trinket)
-	{ p = "Increases your pet's resistances by 130 and increases your spell power by 48%.", s = "SPELLDMG", v = 48 },
-
-	
-};
-
-LibGearExam.StatNames = {
-	STR = "Strength",
-	AGI = "Agility",
-	STA = "Stamina",
-	INT = "Intellect",
-	SPI = "Spirit",
-
-	ARMOR = "Armor",
-
-	ARCANERESIST = "Arcane Resistance",
-	FIRERESIST = "Fire Resistance",
-	NATURERESIST = "Nature Resistance",
-	FROSTRESIST = "Frost Resistance",
-	SHADOWRESIST = "Shadow Resistance",
-
-	DODGE = "Dodge",
-	PARRY = "Parry",
-	DEFENSE = "Defense",
-	BLOCK = "Block",
-	BLOCKVALUE = "Block Value",
-	RESILIENCE = "Resilience",
-
-	AP = "Attack Power",
-	RAP = "Ranged Attack Power",
-	CRIT = "Crit Chance",
---HIT = "Hit Rating (Physical)",
---HASTE = "Haste Rating (Physical)",
-	HIT = "Physical Hit",
-	HASTE = "Physical Haste",
-	WPNDMG = "Weapon Damage",
-	RANGEDDMG = "Ranged Damage",
-	ARMORPENETRATION = "Armor Penetration",
-	EXPERTISE = "Expertise",
-
-	SPELLCRIT = "Spell Crit Chance",
---SPELLHIT = "Hit Rating (Spell)",
---SPELLHASTE = "Haste Rating (Spell)",
-	SPELLHIT = "Spell Hit",
-	SPELLHASTE = "Spell Haste",
-	SPELLPENETRATION = "Spell Penetration",
-
-	-- HEAL = "Healing",
-	SPELLDMG = "Spell Power",
-	ARCANEDMG = "Spell Power (Arcane)",
-	FIREDMG = "Spell Power (Fire)",
-	NATUREDMG = "Spell Power (Nature)",
-	FROSTDMG = "Spell Power (Frost)",
-	SHADOWDMG = "Spell Power (Shadow)",
-	HOLYDMG = "Spell Power (Holy)",
-
-	HP = "Health Points",
-	MP = "Mana Points",
-
-	HP5 = "Health Regen Per 5 Sec",
-	MP5 = "Mana Regen Per 5 Sec",
-	
-	-- Skill Bonuses
-	DAGGERSKILL = "Daggers Skill Bonus",
-	ONEAXESKILL = "Axes Skill Bonus",
-	TWOAXESKILL = "Two-Handed Axes Skill Bonus",
-	ONESWORDSKILL = "Swords Skill Bonus",
-	TWOSWORDSKILL = "Two-Handed Swords Skill Bonus",
-	ONEMACESKILL = "Maces Skill Bonus",
-	TWOMACESKILL = "Two-Handed Maces Skill Bonus",
-	BOWSKILL = "Bows skill Bonus",
-	GUNSSKILL = "Guns skill Bonus",
-	CROSSBOWSKILL = "Crossbows Skill Bonus",
+	-- AQ Enchants --
+	{ p = "Shadow Damage %+(%d+)", s = "SHADOWDMG" },
+	{ p = "Fire Damage %+(%d+)", s = "FIREDMG" },
+	{ p = "Frost Damage %+(%d+)", s = "FROSTDMG" },
 };
