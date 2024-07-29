@@ -1,3 +1,8 @@
+Examiner Changes | 2024 Jul 27
+------------------------------
+- Updated to work with current SoD client (retail)
+- Added "all spells and attacks" hit and crit to the spell attribute mod
+
 Examiner Changes | 2019 Nov 23
 - Added zhCN localization, thanks to Qcat0214
 

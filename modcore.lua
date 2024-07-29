@@ -108,7 +108,8 @@ local function CreateModuleButton(label,tipHeader,tipText)
 	local btn = CreateFrame("Button",nil,ex,"UIPanelButtonGrayTemplate");
 	btn:SetSize(75,21);
 	btn:SetFrameLevel(btn:GetFrameLevel() + 2);
-	btn:RegisterForClicks("AnyUp");
+	-- btn:RegisterForClicks("AnyUp");
+	btn:RegisterForClicks("LeftButtonDown","RightButtonDown");
 	btn:SetScript("OnClick",Buttons_OnClick);
 	btn:SetScript("OnEnter",Buttons_OnEnter);
 	btn:SetScript("OnLeave",ex.HideGTT);
